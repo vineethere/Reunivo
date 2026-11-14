@@ -4,14 +4,16 @@ The pre-launch landing page for **Reunivo**, smart lost & found tags. Someone fi
 
 The site's job is to explain the idea in under a minute and collect waitlist sign-ups.
 
-It's a static site with no install and no build step. The only server code is one small Cloudflare function that powers the live sign-up counter.
+It runs as a **Cloudflare Worker** that serves the static page and one small endpoint for the live sign-up counter. There's no install and no build step.
 
 ```
 reunivo/
-├── index.html   the whole landing page (layout, styles, and scripts)
-├── functions/
-│   └── api/
-│       └── signups.js   Cloudflare function: returns the waitlist count (keeps the API token secret)
+├── public/
+│   └── index.html    the whole landing page (layout, styles, and scripts)
+├── src/
+│   ├── worker.js     Worker entry: /api/signups → counter, everything else → public/
+│   └── signups.js    reads the waitlist count from SilentForms (keeps the API token secret)
+├── wrangler.jsonc    Cloudflare config (Worker name, public/ folder, routes)
 ├── .gitignore
 └── README.md
 ```
@@ -64,7 +66,7 @@ The visitor plays the **finder** on one phone and watches the **owner's** phone 
 
 ## How the sign-up form works
 
-Everything is inside `<form id="join-form">` in `index.html`:
+Everything is inside `<form id="join-form">` in `public/index.html`:
 
 | Field | What it is |
 |---|---|
@@ -91,7 +93,7 @@ If the visitor is offline or the request can't be sent, they see *"Sorry, that d
 ## Live sign-up counter
 
 ```
-Visitor's page ──► /api/signups  (functions/api/signups.js, runs on Cloudflare)
+Visitor's page ──► /api/signups  (src/signups.js, runs on Cloudflare)
                         │  uses SILENTFORMS_TOKEN, a secret stored in Cloudflare, never in the page
                         ▼
                  silentforms.com/api/v1/forms  →  each form's "submissions" (inbox count, spam excluded)
@@ -99,7 +101,7 @@ Visitor's page ──► /api/signups  (functions/api/signups.js, runs on Cloudf
 Page gets { "count": 1280 } ◄┘  → shows "1,280 people have already joined"
 ```
 
-- **The API token never goes in `index.html` or in this repo.** It can read and delete every sign-up, so it lives only in Cloudflare as a secret.
+- **The API token never goes in `public/index.html` or in this repo.** It can read and delete every sign-up, so it lives only in Cloudflare as a secret.
 - The function asks SilentForms **at most once every 5 minutes** and reuses that number in between, which keeps you far under the API limit of 120 requests a minute.
 - The page receives **only the number**, never names or emails.
 - If anything fails (token missing, SilentForms down), the counter simply stays hidden. The rest of the page and the form are not affected.
@@ -107,11 +109,11 @@ Page gets { "count": 1280 } ◄┘  → shows "1,280 people have already joined"
 
 ### Set it up (one time)
 1. **SilentForms → API → Create token.** Copy the `sf_…` token. It's shown only once.
-2. **Cloudflare → your Pages project → Settings → Variables and Secrets → Add**:
+2. **Cloudflare → Workers & Pages → `reunivo` → Settings → Variables and Secrets → Add**:
    - `SILENTFORMS_TOKEN` = your `sf_…` token. Choose **Encrypt / Secret**.
    - `SILENTFORMS_FORM_ID` = the ID of your waitlist form (*recommended*). Without it, the count adds up **every active form** in your account, including a contact form if you have one.
-3. **Deploy again** so the function picks up the settings.
-4. **Check it:** open `https://YOUR-SITE.pages.dev/api/signups`. You should see `{"count": …}`.
+3. Saving a secret applies it right away, so there's no need to redeploy.
+4. **Check it:** open `https://YOUR-SITE.workers.dev/api/signups` (or your own domain). You should see `{"count": …}`.
 
 **Finding your form ID:** run this on any computer that isn't behind a web filter (the token is only on your screen, nothing is saved):
 
@@ -121,13 +123,13 @@ curl https://silentforms.com/api/v1/forms -H "Authorization: Bearer sf_YOUR_TOKE
 
 Each form is listed with its `id`, `name` and `submissions`.
 
-> The function only runs when the site is deployed **from GitHub** (Option A below). With drag-and-drop uploads the `functions/` folder isn't run, so the counter stays hidden.
+> Until `SILENTFORMS_TOKEN` is set, `/api/signups` answers `503` and the counter simply stays hidden.
 
 ---
 
 ## Settings
 
-Near the top of `index.html`:
+Near the top of `public/index.html`:
 
 ```js
 const VIDEO_URL = '';
@@ -139,35 +141,47 @@ const SIGNUP_COUNT_MIN = 25;
 `VIDEO_URL`:
 - Leave it empty to show the animated film.
 - YouTube: `const VIDEO_URL = 'https://www.youtube.com/embed/YOUR_VIDEO_ID';`
-- Your own file: put `film.mp4` next to `index.html` and set `const VIDEO_URL = 'film.mp4';`
+- Your own file: put `film.mp4` in `public/` next to `index.html` and set `const VIDEO_URL = 'film.mp4';`
 
 To switch to a different SilentForms inbox, change the `accessKey` value inside `<form id="join-form">`.
 
-All text, prices and dates are placeholders. Edit them directly in `index.html`.
+All text, prices and dates are placeholders. Edit them directly in `public/index.html`.
 
 ---
 
-## Deploy (Cloudflare Pages)
+## Deploy (Cloudflare Workers, from GitHub)
 
-**Option A: connected to GitHub** (this repo: `vineethere/Reunivo`)
-1. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** → **Connect to Git** → pick this repo.
-2. Build command: *leave empty*. Output directory: `/`.
-3. Every push to GitHub deploys the site again automatically.
-4. Add the counter settings (`SILENTFORMS_TOKEN`, `SILENTFORMS_FORM_ID`). See [Live sign-up counter](#live-sign-up-counter).
+The project is deployed as a **Worker** with static assets, set up by `wrangler.jsonc`:
+- `public/` is the website (served as-is).
+- `src/worker.js` handles only `/api/*`. Everything else goes straight to `public/`.
 
-**Option B: drag and drop**
-1. **Workers & Pages** → **Create** → **Pages** → **Upload assets**.
-2. Drag in the `reunivo` folder and click **Deploy**.
-3. Everything works except the live counter, which needs Option A.
+**Cloudflare build settings** (Workers & Pages → `reunivo` → Settings → Build):
 
-You get a free `your-project.pages.dev` address with no watermark. You can add your own domain later under **Custom domains**.
+| Setting | Value |
+|---|---|
+| Git repository | `vineethere/Reunivo`, branch `main` |
+| Build command | *leave empty* |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+
+Every push to `main` deploys again automatically. You get a free `reunivo.<your-subdomain>.workers.dev` address with no watermark, and you can add your own domain under **Settings → Domains & Routes**.
+
+> **The Worker name must match.** `"name": "reunivo"` in `wrangler.jsonc` must be the same as your Worker's name in the Cloudflare dashboard. If they differ, the build fails or creates a second Worker. Change the line in `wrangler.jsonc` to match.
+
+Then add the counter settings (`SILENTFORMS_TOKEN`, `SILENTFORMS_FORM_ID`). See [Live sign-up counter](#live-sign-up-counter).
+
+**Try it locally (optional):**
+```bash
+npx wrangler dev
+```
+That opens the site at http://localhost:8787 with the counter endpoint working (it needs a `.dev.vars` file containing `SILENTFORMS_TOKEN=…`, which is git-ignored).
 
 **After deploying:** open the live site, submit a test sign-up, check that the "You're in!" message appears, then confirm the entry shows up in your **SilentForms dashboard**. Then open `/api/signups` to check the counter.
 
 ---
 
 ## Tech
-- One [Cloudflare Pages Function](https://developers.cloudflare.com/pages/functions/) (`functions/api/signups.js`) for the sign-up counter.
+- A [Cloudflare Worker with static assets](https://developers.cloudflare.com/workers/static-assets/) (`src/worker.js`, `wrangler.jsonc`) for hosting and the sign-up counter.
 - Plain HTML, plus [Tailwind CSS](https://tailwindcss.com) (loaded from its CDN) for styling.
 - Google Fonts: Fraunces (headings) and Inter (body text).
 - [qrcode-generator](https://github.com/kazuhikoarai/qrcode-generator) for the hero QR code.

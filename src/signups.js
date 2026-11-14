@@ -1,10 +1,10 @@
-// Cloudflare Pages Function: GET /api/signups  ->  { "count": 128 }
+// GET /api/signups  ->  { "count": 128 }   (used by src/worker.js)
 //
 // Returns how many people have joined the waitlist, read from the SilentForms
 // Submissions API. The API token stays here on Cloudflare's servers; the web page
 // only ever receives the number, never names or emails.
 //
-// Settings (Cloudflare → your Pages project → Settings → Variables and Secrets):
+// Settings (Cloudflare → Workers & Pages → your Worker → Settings → Variables and Secrets):
 //   SILENTFORMS_TOKEN    required, a secret. Your "sf_..." API token.
 //   SILENTFORMS_FORM_ID  optional. Which form to count. If left out, every active
 //                        form in your SilentForms account is added up.
@@ -39,7 +39,7 @@ export async function countSignups(env, fetchFn = fetch) {
   return forms.reduce((sum, f) => sum + (Number(f.submissions) || 0), 0);
 }
 
-export async function onRequestGet({ env }) {
+export async function handleSignups(env) {
   if (!env.SILENTFORMS_TOKEN) return reply({ count: null, error: 'SILENTFORMS_TOKEN is not set' }, 503);
 
   if (memo.count !== null && Date.now() - memo.at < CACHE_SECONDS * 1000) {
