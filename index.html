@@ -85,12 +85,13 @@
 <body class="grain text-ink font-sans antialiased overflow-x-hidden">
 
   <!-- ============ CONFIG ============
-       FORM_ENDPOINT: paste a free Formspree URL to receive sign-ups by email.
+       Waitlist sign-ups go to SilentForms (see the <form id="join-form"> below).
+       SIGNUP_COUNT_MIN: the waitlist counter ("128 people have joined") only shows once at least this many have signed up.
        VIDEO_URL: paste a YouTube embed link or an .mp4 path to swap the animated film for a real video.
        See README.md. -->
   <script>
-    const FORM_ENDPOINT = 'https://formspree.io/f/mljbgpky';
     const VIDEO_URL = '';
+    const SIGNUP_COUNT_MIN = 25;
   </script>
 
   <!-- NAV -->
@@ -548,11 +549,21 @@
       <div class="reveal">
         <h2 class="font-serif font-bold text-[2.6rem] sm:text-5xl md:text-7xl leading-[1.04]">Be first to<br /><em>never lose</em><br />things again.</h2>
         <p class="mt-6 text-white/85 text-lg max-w-md">Early members get a free starter pack of tags at launch.</p>
+        <!-- Live sign-up counter: filled in from /api/signups (functions/api/signups.js). Hidden until there's a number to show. -->
+        <p id="signup-count" class="hidden mt-6 inline-flex items-center gap-3 bg-white/15 backdrop-blur rounded-full pl-2 pr-5 py-2 text-white font-medium">
+          <span class="w-8 h-8 rounded-full bg-white text-coral grid place-items-center text-sm">💛</span>
+          <span><b id="signup-count-num" class="font-serif text-xl tabular-nums"></b> people have already joined</span>
+        </p>
       </div>
       <div class="reveal bg-cream text-ink rounded-[2rem] p-5 sm:p-7 shadow-2xl">
-        <form id="join-form" action="https://formspree.io/f/mljbgpky" method="POST" class="space-y-4">
-          <input type="hidden" name="_subject" value="New Reunivo waitlist sign-up" />
+        <form id="join-form" action="https://silentforms.com/api/submit" method="POST" class="space-y-4">
+          <!-- SilentForms access key: tells SilentForms which inbox gets the sign-up -->
+          <input type="hidden" name="accessKey" value="3af1ee1057c39fb8fe12ba11e6e83eb3c9266385d0cc629122df330655daa658" />
           <input type="hidden" name="wants_to_tag" id="wants-to-tag" value="" />
+          <!-- Honeypot spam trap: hidden from people, bots fill it in -->
+          <div style="position:absolute;left:-9999px;" aria-hidden="true">
+            <input type="text" name="sf_extra" tabindex="-1" autocomplete="off" />
+          </div>
           <div>
             <label class="text-xs font-semibold text-ink/60">Your name</label>
             <input name="name" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
@@ -573,15 +584,16 @@
               <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">💻 Laptop</button>
             </div>
           </div>
-          <button class="w-full bg-ink text-cream font-semibold py-4 rounded-2xl hover:bg-coral transition">Join the waitlist →</button>
+          <button type="submit" class="w-full bg-ink text-cream font-semibold py-4 rounded-2xl hover:bg-coral transition">Join the waitlist →</button>
           <p id="join-error" class="hidden text-sm text-coral text-center font-medium" role="alert"></p>
           <p class="text-[11px] text-ink/50 text-center">No spam. We'll only email you about the launch.</p>
         </form>
-        <div id="join-done" class="hidden text-center py-6">
+        <div id="join-done" class="hidden text-center py-6" role="status">
           <div class="text-6xl">💛</div>
           <p class="mt-4 font-serif font-bold text-3xl">You're in!</p>
           <p id="join-done-text" class="mt-2 text-ink/60"></p>
-          <button id="share-btn" class="mt-6 bg-ink text-cream font-semibold px-6 py-3 rounded-full">Share with a friend</button>
+          <p id="join-done-count" class="hidden mt-4 inline-block bg-ink/5 rounded-full px-4 py-2 text-sm font-semibold"></p>
+          <div><button id="share-btn" type="button" class="mt-6 bg-ink text-cream font-semibold px-6 py-3 rounded-full">Share with a friend</button></div>
         </div>
       </div>
     </div>
@@ -727,6 +739,22 @@
       upd(); setInterval(upd, 30000);
     })();
 
+    // ---------- Live sign-up counter ----------
+    // Reads the number from /api/signups (functions/api/signups.js on Cloudflare).
+    function getSignupCount() {
+      if (!location.protocol.startsWith('http')) return Promise.resolve(null); // needs the live site
+      return fetch('/api/signups', { cache: 'no-store' })
+        .then(r => (r.ok ? r.json() : null))
+        .then(d => { const n = d && Number(d.count); return Number.isFinite(n) ? n : null; })
+        .catch(() => null); // no counter is better than a broken one
+    }
+    const fmtCount = n => n.toLocaleString('en-IN');
+    getSignupCount().then(n => {
+      if (n === null || n < SIGNUP_COUNT_MIN) return;
+      document.getElementById('signup-count-num').textContent = fmtCount(n);
+      document.getElementById('signup-count').classList.remove('hidden');
+    });
+
     // ---------- Waitlist ----------
     (function () {
       const picked = new Set();
@@ -736,37 +764,45 @@
         else { picked.add(v); c.classList.add('bg-ink', 'text-cream', 'border-ink'); }
         document.getElementById('wants-to-tag').value = [...picked].join(', ');
       }));
+
+      // The sign-up is sent to SilentForms in the background, so the visitor stays on
+      // this page and sees a "You're in!" message instead of being sent anywhere else.
       const form = document.getElementById('join-form');
+      const btn = form.querySelector('button[type=submit]');
+      const btnText = btn.textContent;
+      const errEl = document.getElementById('join-error');
       form.addEventListener('submit', async e => {
         e.preventDefault();
-        const data = Object.fromEntries(new FormData(form));
-        data.wants_to_tag = [...picked].join(', ');
-        data.joined_at = new Date().toISOString();
-        const btn = form.querySelector('button[type=submit], button:not([type])');
-        const errEl = document.getElementById('join-error');
-        const btnText = btn.textContent;
+        const body = new FormData(form);
+        const name = String(body.get('name') || '').trim();
+        const email = String(body.get('email') || '').trim();
         errEl.classList.add('hidden');
         btn.disabled = true; btn.textContent = 'Joining…';
-        if (FORM_ENDPOINT) {
-          try {
-            const res = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) });
-            if (!res.ok) {
-              const body = await res.json().catch(() => ({}));
-              throw new Error((body.errors || []).map(x => x.message).join(' ') || 'Formspree returned ' + res.status);
-            }
-          } catch (err) {
-            console.error(err);
-            errEl.textContent = 'Sorry, that didn\'t go through. Please check your connection and try again.';
-            errEl.classList.remove('hidden');
-            btn.disabled = false; btn.textContent = btnText;
-            return;
-          }
+        try {
+          // 'no-cors' lets the browser send the form to SilentForms like a normal form post.
+          // The reply can't be read, but a network failure still lands in catch below.
+          await fetch(form.action, { method: 'POST', body, mode: 'no-cors' });
+        } catch (err) {
+          console.error(err);
+          errEl.textContent = 'Sorry, that didn\'t go through. Please check your connection and try again.';
+          errEl.classList.remove('hidden');
+          btn.disabled = false; btn.textContent = btnText;
+          return;
         }
-        try { const all = JSON.parse(localStorage.getItem('reunivo-waitlist') || '[]'); all.push(data); localStorage.setItem('reunivo-waitlist', JSON.stringify(all)); } catch {}
         form.classList.add('hidden');
-        document.getElementById('join-done-text').textContent = `Thanks ${data.name.split(' ')[0]}! We'll email ${data.email} the moment Reunivo launches.`;
+        document.getElementById('join-done-text').textContent =
+          `Thanks ${name.split(' ')[0] || 'friend'}! We'll email ${email} the moment Reunivo launches.`;
         document.getElementById('join-done').classList.remove('hidden');
+
+        // Show how many people have subscribed so far (including this sign-up once SilentForms counts it).
+        const n = await getSignupCount();
+        if (n !== null && n > 0) {
+          const countEl = document.getElementById('join-done-count');
+          countEl.textContent = n === 1 ? '🎉 1 person has already subscribed' : `🎉 ${fmtCount(n)} people have already subscribed`;
+          countEl.classList.remove('hidden');
+        }
       });
+
       document.getElementById('share-btn').addEventListener('click', async () => {
         const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : 'https://reunivo.app';
         const share = { title: 'Reunivo', text: 'Every lost thing has a way home. Join the Reunivo waitlist:', url };
