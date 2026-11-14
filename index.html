@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reunivo — Every lost thing has a way home</title>
+  <meta name="description" content="Reunivo smart tags bring lost things back. Anyone can scan, nobody sees your number, and you know the moment it's found. Join the waitlist." />
+  <meta property="og:title" content="Reunivo — Every lost thing has a way home" />
+  <meta property="og:description" content="Smart lost & found tags. Scan with any phone. Your number stays private." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500;1,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { cream: '#FBF7F0', ink: '#14121F', coral: '#FF5A36', mint: '#2EC4A0', lilac: '#CDB4FF', sun: '#FFD166' },
+          fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Fraunces', 'serif'] },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    html, body { overflow-x: clip; max-width: 100%; }
+    section[id], #join { scroll-margin-top: 5.5rem; }
+    /* Mobile menu */
+    #mobile-menu { display: none; }
+    #mobile-menu.open { display: block; animation: rise .3s ease-out both; }
+    @media (max-width: 640px) {
+      .phone { width: min(260px, 78vw); height: min(520px, 156vw); }
+      .card-tilt:hover { transform: none; }
+    }
+    body { background: #FBF7F0; }
+    .grain::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .05;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+    /* Swinging hero tag */
+    @keyframes swing { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+    .swing { animation: swing 4.5s ease-in-out infinite; transform-origin: 50% 0; }
+
+    /* Marquee */
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+    .marquee { animation: marquee 32s linear infinite; }
+
+    /* Scroll reveal */
+    .reveal { opacity: 0; transform: translateY(28px); transition: all .8s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* Film */
+    .scene { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
+    .scene.active { opacity: 1; }
+    .scene.active .pop { animation: pop .7s cubic-bezier(.2,1.4,.4,1) both; }
+    .scene.active .drop { animation: drop .8s cubic-bezier(.2,1.3,.4,1) .4s both; }
+    .scene.active .walk { animation: walk 3.2s ease-in .6s both; }
+    .scene.active .tagon { animation: tagon 1s cubic-bezier(.2,1.4,.4,1) .7s both; }
+    .scene.active .scanline { animation: scanline 1.4s ease-in-out .6s infinite; }
+    .scene.active .rise { animation: rise .8s ease-out both; }
+    .scene.active .rise2 { animation: rise .8s ease-out .5s both; }
+    .scene.active .confetti i { animation: confetti 2.6s ease-out both; }
+    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes drop { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes walk { from { transform: translateX(0); opacity: 1; } to { transform: translateX(260%); opacity: 0; } }
+    @keyframes tagon { from { transform: translate(80px,-80px) rotate(40deg); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes scanline { 0%,100% { top: 8%; } 50% { top: 84%; } }
+    @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+    @keyframes confetti { from { transform: translateY(0) rotate(0); opacity: 1; } to { transform: translateY(var(--y)) translateX(var(--x)) rotate(540deg); opacity: 0; } }
+
+    /* Demo phones */
+    .phone { width: 260px; height: 520px; border-radius: 2.6rem; background: #14121F; padding: 10px; box-shadow: 0 30px 60px -20px rgba(20,18,31,.45); }
+    .phone > .screen { width: 100%; height: 100%; border-radius: 2.1rem; overflow: hidden; position: relative; }
+    .step { display: none; }
+    .step.on { display: flex; animation: rise .5s ease-out both; }
+    @keyframes ping { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(2.2); opacity: 0; } }
+    .ping::after { content: ''; position: absolute; inset: 0; border-radius: 9999px; background: #FF5A36; animation: ping 1.6s infinite; z-index: -1; }
+
+    .card-tilt { transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+    .card-tilt:hover { transform: translateY(-6px) rotate(-1.2deg); }
+  </style>
+</head>
+<body class="grain text-ink font-sans antialiased overflow-x-hidden">
+
+  <!-- ============ CONFIG ============
+       FORM_ENDPOINT: paste a free Formspree URL to receive sign-ups by email.
+       VIDEO_URL: paste a YouTube embed link or an .mp4 path to swap the animated film for a real video.
+       See README.md. -->
+  <script>
+    const FORM_ENDPOINT = '';
+    const VIDEO_URL = '';
+  </script>
+
+  <!-- NAV -->
+  <header class="fixed top-0 inset-x-0 z-40">
+    <div class="max-w-6xl mx-auto mt-4 px-4">
+      <div class="flex items-center justify-between bg-cream/80 backdrop-blur-md border border-ink/10 rounded-full pl-4 sm:pl-5 pr-2 py-2">
+        <a href="#" class="font-serif font-bold text-xl sm:text-2xl tracking-tight">reunivo<span class="text-coral">.</span></a>
+        <nav class="hidden md:flex gap-7 text-sm font-medium text-ink/70">
+          <a href="#film" class="hover:text-coral">Watch</a>
+          <a href="#try" class="hover:text-coral">Try it</a>
+          <a href="#tags" class="hover:text-coral">Tags</a>
+          <a href="#privacy" class="hover:text-coral">Privacy</a>
+          <a href="#faq" class="hover:text-coral">FAQ</a>
+        </nav>
+        <div class="flex items-center gap-2">
+          <a href="#join" class="bg-ink text-cream text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-full hover:bg-coral transition whitespace-nowrap">Join waitlist</a>
+          <button id="menu-btn" class="md:hidden w-10 h-10 rounded-full border border-ink/15 grid place-items-center text-lg" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
+        </div>
+      </div>
+      <nav id="mobile-menu" class="md:hidden mt-2 bg-cream/95 backdrop-blur-md border border-ink/10 rounded-3xl p-2 shadow-xl">
+        <a href="#film" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Watch the film</a>
+        <a href="#try" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Try it</a>
+        <a href="#tags" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Tags</a>
+        <a href="#privacy" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Privacy</a>
+        <a href="#faq" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="relative overflow-hidden pt-32 pb-12 md:pt-44 md:pb-24">
+    <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-lilac/50 blur-3xl"></div>
+    <div class="absolute top-80 -left-32 w-96 h-96 rounded-full bg-sun/40 blur-3xl"></div>
+    <div class="relative max-w-6xl mx-auto px-5 grid md:grid-cols-[1.25fr_1fr] gap-10 items-center">
+      <div>
+        <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-ink/60">
+          <span class="w-2 h-2 rounded-full bg-coral relative ping"></span> Coming soon · Pre-launch
+        </p>
+        <h1 class="mt-5 font-serif font-bold text-[2.6rem] leading-[1.04] sm:text-[3.3rem] md:text-[5.4rem] tracking-tight">
+          Every lost thing<br />has a <em class="text-coral">way home.</em>
+        </h1>
+        <p class="mt-5 md:mt-6 text-base sm:text-lg md:text-xl text-ink/70 max-w-lg">
+          Reunivo tags turn any stranger into a helper. They scan with a phone camera, you get an instant alert, and your number stays private. No app for them. No battery for you.
+        </p>
+        <div class="mt-9 flex flex-wrap items-center gap-4">
+          <a href="#join" class="bg-coral text-white font-semibold px-7 py-4 rounded-full shadow-lg shadow-coral/30 hover:-translate-y-0.5 transition">Get early access</a>
+          <a href="#film" class="group flex items-center gap-3 font-semibold">
+            <span class="w-12 h-12 rounded-full border-2 border-ink grid place-items-center group-hover:bg-ink group-hover:text-cream transition">▶</span>
+            Watch the 30-sec film
+          </a>
+        </div>
+      </div>
+
+      <!-- Swinging tag -->
+      <div class="flex justify-center md:justify-end">
+        <div class="relative h-[380px] sm:h-[420px] w-[280px]">
+          <div class="absolute left-1/2 top-0 w-px h-20 bg-ink/40"></div>
+          <div class="swing absolute left-1/2 -ml-[120px] top-16 w-[240px]">
+            <div class="mx-auto w-5 h-5 rounded-full border-[3px] border-ink/40 bg-cream -mb-2 relative z-10"></div>
+            <div class="bg-ink text-cream rounded-[2rem] p-6 pt-8 shadow-2xl">
+              <div class="flex justify-between items-center text-xs">
+                <span class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></span>
+                <span class="text-cream/50">RV-7K2M</span>
+              </div>
+              <div id="hero-qr" class="mt-4 bg-cream rounded-2xl p-3 aspect-square grid place-items-center"></div>
+              <p class="mt-4 font-serif italic text-xl leading-tight">Found me?<br /><span class="text-coral">Scan me.</span></p>
+              <p class="text-[11px] text-cream/50 mt-2">or visit reunivo.app/f/7K2M</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MARQUEE -->
+  <section class="border-y border-ink/10 bg-ink text-cream py-4 overflow-hidden">
+    <div class="marquee flex w-max gap-10 font-serif italic text-xl md:text-2xl whitespace-nowrap">
+      <span>keys ✦ wallets ✦ backpacks ✦ laptops ✦ earbuds ✦ pet collars ✦ kids' bottles ✦ suitcases ✦ umbrellas ✦ cameras ✦ water bottles ✦ jackets ✦ school bags ✦ </span>
+      <span>keys ✦ wallets ✦ backpacks ✦ laptops ✦ earbuds ✦ pet collars ✦ kids' bottles ✦ suitcases ✦ umbrellas ✦ cameras ✦ water bottles ✦ jackets ✦ school bags ✦ </span>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-5xl mx-auto px-5 text-center reveal">
+      <p class="text-xs font-semibold tracking-widest uppercase text-coral">The problem</p>
+      <h2 class="mt-4 font-serif font-bold text-4xl md:text-6xl leading-tight">Most people <em>want</em> to return what they find.<br /><span class="text-ink/40">They just have no way to reach you.</span></h2>
+      <div class="mt-10 md:mt-14 grid md:grid-cols-3 gap-5 text-left">
+        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">🤷</p><p class="mt-4 font-semibold">No name, no number</p><p class="text-ink/60 text-sm mt-1">A finder holds your bag and has no idea who it belongs to.</p></div>
+        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">😬</p><p class="mt-4 font-semibold">Labels expose you</p><p class="text-ink/60 text-sm mt-1">Writing your phone number on things invites spam and strangers.</p></div>
+        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">💸</p><p class="mt-4 font-semibold">Trackers are costly</p><p class="text-ink/60 text-sm mt-1">GPS trackers cost thousands, need charging, and don't fit everything.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILM -->
+  <section id="film" class="py-16 md:py-20 bg-ink text-cream relative overflow-hidden">
+    <div class="absolute -bottom-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-coral/20 blur-3xl rounded-full"></div>
+    <div class="relative max-w-5xl mx-auto px-5">
+      <div class="text-center reveal">
+        <p class="text-xs font-semibold tracking-widest uppercase text-sun">The film</p>
+        <h2 class="mt-3 font-serif font-bold text-4xl md:text-5xl">A backpack's journey home, in 30 seconds.</h2>
+      </div>
+
+      <div id="film-wrap" class="mt-12 reveal">
+        <div id="film-stage" class="relative aspect-[4/5] sm:aspect-video rounded-3xl sm:rounded-[2rem] overflow-hidden bg-[#1E1B2E] shadow-2xl ring-1 ring-white/10 select-none">
+
+          <!-- Scene 1: tag it -->
+          <div class="scene" data-caption="1 · Stick a Reunivo tag on anything you love.">
+            <div class="absolute inset-0 bg-gradient-to-br from-[#2A2440] to-[#1E1B2E]"></div>
+            <div class="absolute inset-0 grid place-items-center">
+              <div class="relative pop">
+                <div class="text-[9rem] md:text-[12rem] leading-none">🎒</div>
+                <div class="tagon absolute -right-6 top-6 bg-cream text-ink rounded-xl px-3 py-2 shadow-xl rotate-6">
+                  <p class="font-serif font-bold text-sm">reunivo<span class="text-coral">.</span></p>
+                  <div class="w-12 h-12 mt-1 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:8px_8px] rounded"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scene 2: lost -->
+          <div class="scene" data-caption="2 · Life happens. It gets left behind at a café.">
+            <div class="absolute inset-0 bg-gradient-to-b from-[#3B2F2A] to-[#1E1B2E]"></div>
+            <div class="absolute bottom-[18%] inset-x-0 h-1 bg-white/10"></div>
+            <div class="absolute bottom-[19%] left-[22%] text-7xl md:text-8xl pop">🪑</div>
+            <div class="absolute bottom-[30%] left-[25%] text-4xl md:text-5xl pop">🎒</div>
+            <div class="absolute bottom-[19%] left-[42%] text-7xl md:text-8xl walk">🚶</div>
+            <div class="absolute top-[12%] right-[10%] text-5xl opacity-70 pop">☕</div>
+          </div>
+
+          <!-- Scene 3: scanned -->
+          <div class="scene" data-caption="3 · Someone kind scans it with their normal camera. No app.">
+            <div class="absolute inset-0 bg-gradient-to-br from-[#1F3A3A] to-[#1E1B2E]"></div>
+            <div class="absolute inset-0 grid place-items-center">
+              <div class="relative pop w-[44%] sm:w-[28%] aspect-[9/17] bg-ink rounded-[1.6rem] p-2 ring-1 ring-white/20">
+                <div class="relative w-full h-full rounded-[1.2rem] bg-[#0b0a12] overflow-hidden grid place-items-center">
+                  <div class="text-5xl md:text-7xl">🎒</div>
+                  <div class="absolute inset-[18%] border-2 border-sun rounded-xl"></div>
+                  <div class="scanline absolute left-[18%] right-[18%] h-0.5 bg-sun shadow-[0_0_14px_#FFD166]"></div>
+                  <p class="absolute bottom-3 text-[10px] md:text-xs text-cream/70">Scanning…</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scene 4: alert -->
+          <div class="scene" data-caption="4 · You know instantly. Where, when, and a message.">
+            <div class="absolute inset-0 bg-gradient-to-br from-[#2A2440] to-[#3A1F2A]"></div>
+            <div class="absolute inset-0 grid place-items-center px-6">
+              <div class="w-full max-w-md space-y-3">
+                <div class="drop bg-cream text-ink rounded-2xl p-4 shadow-2xl flex gap-3 items-start">
+                  <div class="w-10 h-10 shrink-0 rounded-xl bg-coral text-white grid place-items-center">🔔</div>
+                  <div><p class="font-semibold text-sm md:text-base">Your backpack was just scanned</p><p class="text-xs md:text-sm text-ink/60">Near Blue Tokai Café · just now</p></div>
+                </div>
+                <div class="rise2 bg-white/10 backdrop-blur rounded-2xl p-4 text-sm md:text-base">
+                  <p class="text-cream/60 text-xs mb-1">Message from the finder</p>
+                  “Hey! Found your bag by the window seat. I've left it with the café counter 🙂”
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Scene 5: reunited -->
+          <div class="scene" data-caption="5 · Reunited. No numbers shared, no awkward calls.">
+            <div class="absolute inset-0 bg-gradient-to-br from-coral to-[#C2361A]"></div>
+            <div class="confetti absolute inset-0 overflow-hidden">
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-sun" style="--x:-220px;--y:-160px"></i>
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-cream" style="--x:200px;--y:-180px"></i>
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-mint" style="--x:-160px;--y:140px"></i>
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-lilac" style="--x:240px;--y:120px"></i>
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-sun" style="--x:60px;--y:-220px"></i>
+              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-cream" style="--x:-60px;--y:200px"></i>
+            </div>
+            <div class="absolute inset-0 grid place-items-center text-center">
+              <div>
+                <div class="pop text-7xl md:text-[9rem] leading-none">🎒💛</div>
+                <p class="rise2 mt-4 font-serif font-bold text-3xl md:text-5xl text-white">Back where it belongs.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- End card -->
+          <div class="scene" data-caption="Reunivo · Every lost thing has a way home.">
+            <div class="absolute inset-0 bg-ink"></div>
+            <div class="absolute inset-0 grid place-items-center text-center px-6">
+              <div class="rise">
+                <p class="font-serif font-bold text-4xl sm:text-5xl md:text-7xl">reunivo<span class="text-coral">.</span></p>
+                <p class="mt-3 font-serif italic text-xl md:text-2xl text-cream/70">Every lost thing has a way home.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Play overlay -->
+          <button id="film-play" class="absolute inset-0 z-20 grid place-items-center bg-ink/60 backdrop-blur-sm group" aria-label="Play film">
+            <div class="text-center">
+              <span class="mx-auto w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-coral text-white text-2xl sm:text-3xl grid place-items-center shadow-2xl shadow-coral/40 group-hover:scale-110 transition">▶</span>
+              <p class="mt-4 sm:mt-5 font-serif italic text-xl sm:text-2xl">Play the film</p>
+              <p class="text-sm text-cream/60 mt-1">30 seconds · with captions</p>
+            </div>
+          </button>
+
+          <!-- Caption + controls -->
+          <div class="absolute bottom-0 inset-x-0 z-10 p-4 md:p-6 bg-gradient-to-t from-black/70 to-transparent">
+            <p id="film-caption" class="text-center text-sm md:text-lg font-medium mb-3 min-h-[1.5em]"></p>
+            <div class="flex items-center gap-3">
+              <button id="film-toggle" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 grid place-items-center text-sm" aria-label="Play or pause">❚❚</button>
+              <div class="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden"><div id="film-bar" class="h-full w-0 bg-coral"></div></div>
+              <span id="film-time" class="text-xs tabular-nums text-cream/70 w-10 text-right">0:00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="reveal max-w-2xl">
+        <p class="text-xs font-semibold tracking-widest uppercase text-coral">How it works</p>
+        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl leading-tight">Three steps.<br /><em>Zero awkwardness.</em></h2>
+      </div>
+      <div class="mt-10 md:mt-14 grid md:grid-cols-3 gap-6">
+        <div class="reveal card-tilt bg-lilac rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
+          <span class="font-serif font-bold text-7xl text-ink/20">01</span>
+          <h3 class="mt-auto font-serif font-bold text-3xl">Tag it</h3>
+          <p class="mt-2 text-ink/70">Stick a tag, scan it once, and name your item. Takes 20 seconds.</p>
+        </div>
+        <div class="reveal card-tilt bg-sun rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
+          <span class="font-serif font-bold text-7xl text-ink/20">02</span>
+          <h3 class="mt-auto font-serif font-bold text-3xl">Someone scans</h3>
+          <p class="mt-2 text-ink/70">Any phone camera works. The finder sees a friendly page, never your details.</p>
+        </div>
+        <div class="reveal card-tilt bg-mint rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
+          <span class="font-serif font-bold text-7xl text-ink/20">03</span>
+          <h3 class="mt-auto font-serif font-bold text-3xl">You reunite</h3>
+          <p class="mt-2 text-ink/70">Get an alert and a private chat. Arrange the return your way.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRY IT: interactive demo -->
+  <section id="try" class="py-16 md:py-24 bg-white">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="text-center reveal">
+        <p class="text-xs font-semibold tracking-widest uppercase text-coral">Try it yourself</p>
+        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Be the finder for a minute.</h2>
+        <p class="mt-4 text-ink/60 max-w-xl mx-auto">You found a wallet with a Reunivo tag. Scan it on the left and watch the owner's phone on the right.</p>
+      </div>
+
+      <div class="mt-10 md:mt-14 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-20 reveal">
+        <!-- Finder phone -->
+        <div class="text-center">
+          <p class="text-xs font-semibold uppercase tracking-widest text-ink/50 mb-4">Finder's phone</p>
+          <div class="phone mx-auto"><div class="screen bg-cream">
+            <!-- Step A: found -->
+            <div class="step on flex-col items-center justify-center h-full p-6 text-center" data-step="a">
+              <div class="relative">
+                <div class="text-8xl">👛</div>
+                <div class="absolute -right-4 bottom-0 bg-ink text-cream rounded-lg px-2 py-1 text-[10px] font-bold rotate-6">reunivo.</div>
+              </div>
+              <p class="mt-6 font-serif font-bold text-xl">You found a wallet</p>
+              <p class="text-xs text-ink/60 mt-1">It has a little tag on it…</p>
+              <button data-go="b" class="mt-6 w-full bg-ink text-cream font-semibold py-3 rounded-2xl">📷 Scan the tag</button>
+            </div>
+            <!-- Step B: scanning -->
+            <div class="step flex-col items-center justify-center h-full bg-[#0b0a12] text-cream relative" data-step="b">
+              <div class="text-7xl">👛</div>
+              <div class="absolute inset-[22%] border-2 border-sun rounded-2xl"></div>
+              <p class="absolute bottom-10 text-xs text-cream/70">Scanning…</p>
+            </div>
+            <!-- Step C: finder page -->
+            <div class="step flex-col h-full p-5" data-step="c">
+              <p class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></p>
+              <div class="mt-4 bg-white rounded-2xl p-4 border border-ink/5">
+                <p class="text-3xl">👛</p>
+                <p class="mt-2 font-semibold">This wallet belongs to <span class="text-coral">Aarav</span></p>
+                <p class="text-[11px] text-ink/50 mt-1">🔒 Their number and address stay private.</p>
+              </div>
+              <label class="mt-4 text-[11px] font-semibold text-ink/60">Send Aarav a message</label>
+              <textarea id="finder-msg" rows="3" class="mt-1 w-full text-sm rounded-xl border border-ink/15 p-3 focus:outline-none focus:border-coral">Hi! I found your wallet near Gate 3 of the metro station. Where can I leave it?</textarea>
+              <button data-go="d" class="mt-auto w-full bg-coral text-white font-semibold py-3 rounded-2xl">Send privately</button>
+            </div>
+            <!-- Step D: sent + reply -->
+            <div class="step flex-col h-full p-5" data-step="d">
+              <p class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></p>
+              <p class="text-[11px] text-ink/50">Private chat with Aarav</p>
+              <div class="mt-4 space-y-2 text-sm flex-1">
+                <div id="finder-sent" class="ml-auto max-w-[85%] bg-ink text-cream rounded-2xl rounded-br-md p-3"></div>
+                <div id="finder-reply" class="hidden max-w-[85%] bg-white border border-ink/10 rounded-2xl rounded-bl-md p-3">Thank you SO much! 🙏 Could you hand it to the station help desk? I'll pick it up in 20 mins.</div>
+              </div>
+              <div id="finder-done" class="hidden bg-mint/20 text-ink rounded-2xl p-3 text-center text-xs font-semibold">🏅 You just helped someone. Thank you!</div>
+              <button data-go="a" class="mt-3 text-xs font-semibold text-ink/50 underline">Restart demo</button>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="hidden md:block font-serif italic text-ink/30 text-3xl">→</div>
+
+        <!-- Owner phone -->
+        <div class="text-center">
+          <p class="text-xs font-semibold uppercase tracking-widest text-ink/50 mb-4">Owner's phone</p>
+          <div class="phone mx-auto"><div class="screen bg-gradient-to-b from-[#3B2F5C] to-[#14121F] text-cream">
+            <div class="pt-10 text-center">
+              <p class="text-5xl font-light tabular-nums" id="owner-clock">9:41</p>
+              <p class="text-xs text-cream/60 mt-1">Saturday</p>
+            </div>
+            <div class="px-3 mt-8 space-y-2">
+              <div id="owner-alert" class="hidden bg-cream/95 text-ink rounded-2xl p-3 text-left shadow-xl" style="animation: drop .7s cubic-bezier(.2,1.3,.4,1) both">
+                <p class="text-[10px] text-ink/50 font-semibold">REUNIVO · now</p>
+                <p class="text-sm font-semibold">Your wallet was just scanned 📍</p>
+                <p class="text-xs text-ink/60">Near Rajiv Chowk Metro</p>
+              </div>
+              <div id="owner-msg" class="hidden bg-cream/95 text-ink rounded-2xl p-3 text-left shadow-xl" style="animation: drop .7s cubic-bezier(.2,1.3,.4,1) both">
+                <p class="text-[10px] text-ink/50 font-semibold">REUNIVO · Finder message</p>
+                <p id="owner-msg-text" class="text-xs mt-1"></p>
+                <button id="owner-reply" class="mt-2 w-full bg-coral text-white text-xs font-semibold py-2 rounded-xl">Reply: hand it to the help desk</button>
+              </div>
+              <p id="owner-idle" class="text-center text-xs text-cream/40 pt-10">No alerts. Your things are safe.</p>
+            </div>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="py-16 md:py-24">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <h2 class="font-serif font-bold text-4xl md:text-6xl leading-tight max-w-xl">Made for the things<br /><em class="text-coral">you'd hate to lose.</em></h2>
+        <p class="text-ink/60 max-w-sm">From your keys to your kid's water bottle to your dog. If it can carry a sticker, it can find its way home.</p>
+      </div>
+      <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">✈️</p><p class="mt-6 font-semibold">Travellers</p><p class="text-sm text-ink/60">Luggage, passports pouches, chargers.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🎓</p><p class="mt-6 font-semibold">Students</p><p class="text-sm text-ink/60">Laptops, ID cards, bags, calculators.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🧒</p><p class="mt-6 font-semibold">Parents</p><p class="text-sm text-ink/60">Bottles, lunch boxes, school bags, toys.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🐶</p><p class="mt-6 font-semibold">Pet parents</p><p class="text-sm text-ink/60">Collar tags that help strangers bring them home.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🔑</p><p class="mt-6 font-semibold">Everyone</p><p class="text-sm text-ink/60">Keys, wallets, umbrellas, jackets.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🎧</p><p class="mt-6 font-semibold">Gadget lovers</p><p class="text-sm text-ink/60">Earbud cases, cameras, power banks.</p></div>
+        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">👵</p><p class="mt-6 font-semibold">Elderly care</p><p class="text-sm text-ink/60">Walking sticks, glasses cases, medicine pouches.</p></div>
+        <div class="reveal card-tilt bg-ink text-cream rounded-3xl p-4 sm:p-6"><p class="text-4xl">🏢</p><p class="mt-6 font-semibold">Teams & events</p><p class="text-sm text-cream/60">Office equipment, event gear. Coming later.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAGS -->
+  <section id="tags" class="py-16 md:py-24 bg-ink text-cream">
+    <div class="max-w-6xl mx-auto px-5">
+      <div class="text-center reveal">
+        <p class="text-xs font-semibold tracking-widest uppercase text-sun">The tags</p>
+        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Small. Tough. <em>Battery-free.</em></h2>
+        <p class="mt-4 text-cream/60">Waterproof, scratch-resistant, and they never need charging.</p>
+      </div>
+      <div class="mt-10 md:mt-14 grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
+          <div class="h-40 grid place-items-center"><div class="w-16 h-16 rounded-xl bg-cream grid place-items-center"><div class="w-10 h-10 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:6px_6px]"></div></div></div>
+          <p class="font-serif font-bold text-2xl">Mini sticker</p><p class="text-sm text-cream/60 mt-1">For phones, earbuds, remotes and cards.</p>
+        </div>
+        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
+          <div class="h-40 grid place-items-center"><div class="relative"><div class="w-4 h-4 rounded-full border-2 border-cream/60 mx-auto -mb-1"></div><div class="w-20 h-24 rounded-2xl bg-coral grid place-items-center"><div class="w-12 h-12 bg-cream rounded-md grid place-items-center"><div class="w-8 h-8 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div></div></div></div>
+          <p class="font-serif font-bold text-2xl">Keychain</p><p class="text-sm text-cream/60 mt-1">For keys, bags and zips.</p>
+        </div>
+        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
+          <div class="h-40 grid place-items-center"><div class="w-32 h-20 rounded-2xl bg-sun text-ink p-2 flex gap-2 items-center"><div class="w-14 h-14 bg-cream rounded-md grid place-items-center"><div class="w-10 h-10 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div><p class="font-serif font-bold text-xs leading-tight">Found me?<br />Scan me.</p></div></div>
+          <p class="font-serif font-bold text-2xl">Luggage tag</p><p class="text-sm text-cream/60 mt-1">For suitcases and backpacks.</p>
+        </div>
+        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
+          <div class="h-40 grid place-items-center"><div class="w-20 h-20 rounded-full bg-mint grid place-items-center relative"><span class="absolute -top-2 text-2xl">🐾</span><div class="w-11 h-11 bg-cream rounded-md grid place-items-center"><div class="w-8 h-8 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div></div></div>
+          <p class="font-serif font-bold text-2xl">Pet tag</p><p class="text-sm text-cream/60 mt-1">For collars. Finders can call you through a masked line.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section id="privacy" class="py-16 md:py-24">
+    <div class="max-w-5xl mx-auto px-5">
+      <div class="text-center reveal">
+        <p class="text-xs font-semibold tracking-widest uppercase text-coral">Privacy first</p>
+        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Helpful to strangers.<br /><em>Invisible to creeps.</em></h2>
+      </div>
+      <div class="mt-10 md:mt-14 grid md:grid-cols-2 gap-5">
+        <div class="reveal bg-white rounded-[2rem] p-6 sm:p-8 border border-ink/5">
+          <p class="font-serif font-bold text-2xl">👀 What a finder sees</p>
+          <ul class="mt-5 space-y-3 text-ink/80">
+            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> Your first name, if you choose to show it</li>
+            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> What the item is</li>
+            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> A button to message you privately</li>
+            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> Your note, like "Reward offered"</li>
+          </ul>
+        </div>
+        <div class="reveal bg-ink text-cream rounded-[2rem] p-6 sm:p-8">
+          <p class="font-serif font-bold text-2xl">🔒 What stays hidden</p>
+          <ul class="mt-5 space-y-3 text-cream/80">
+            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your phone number</li>
+            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your email and address</li>
+            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your surname and photos</li>
+            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Anything you don't switch on</li>
+          </ul>
+        </div>
+      </div>
+      <p class="reveal mt-6 text-center text-sm text-ink/60">🛡️ Our chat blocks money demands and payment details, so nobody can hold your things for ransom.</p>
+    </div>
+  </section>
+
+  <!-- COMPARISON -->
+  <section class="py-16 md:py-24 bg-white">
+    <div class="max-w-4xl mx-auto px-5">
+      <h2 class="reveal font-serif font-bold text-4xl md:text-5xl text-center">Why not just…</h2>
+      <p class="md:hidden mt-6 text-center text-xs text-ink/40">Swipe the table sideways →</p>
+      <div class="reveal mt-4 md:mt-12 overflow-x-auto -mx-5 px-5">
+        <table class="w-full min-w-[520px] text-left text-sm md:text-base">
+          <thead>
+            <tr class="border-b border-ink/10">
+              <th class="py-4 pr-4 font-medium text-ink/50"></th>
+              <th class="py-4 px-3 font-medium text-ink/50">Name label</th>
+              <th class="py-4 px-3 font-medium text-ink/50">GPS tracker</th>
+              <th class="py-4 px-3 font-serif font-bold text-coral text-lg">Reunivo</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-ink/5">
+            <tr><td class="py-4 pr-4 font-medium">Keeps your number private</td><td class="px-3">✕</td><td class="px-3">✓</td><td class="px-3 font-bold text-coral">✓</td></tr>
+            <tr><td class="py-4 pr-4 font-medium">Finder can message you</td><td class="px-3">Calls only</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
+            <tr><td class="py-4 pr-4 font-medium">No battery or charging</td><td class="px-3">✓</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
+            <tr><td class="py-4 pr-4 font-medium">Works with any phone</td><td class="px-3">✓</td><td class="px-3">Often one brand</td><td class="px-3 font-bold text-coral">✓</td></tr>
+            <tr><td class="py-4 pr-4 font-medium">Cheap enough for everything</td><td class="px-3">✓</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- WAITLIST -->
+  <section id="join" class="py-16 md:py-24 relative overflow-hidden">
+    <div class="absolute inset-0 bg-coral"></div>
+    <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-sun/40 blur-3xl"></div>
+    <div class="relative max-w-5xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center text-white">
+      <div class="reveal">
+        <h2 class="font-serif font-bold text-[2.6rem] sm:text-5xl md:text-7xl leading-[1.04]">Be first to<br /><em>never lose</em><br />things again.</h2>
+        <p class="mt-6 text-white/85 text-lg max-w-md">Early members get a free starter pack of tags at launch.</p>
+      </div>
+      <div class="reveal bg-cream text-ink rounded-[2rem] p-5 sm:p-7 shadow-2xl">
+        <form id="join-form" class="space-y-4">
+          <div>
+            <label class="text-xs font-semibold text-ink/60">Your name</label>
+            <input name="name" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
+          </div>
+          <div>
+            <label class="text-xs font-semibold text-ink/60">Email</label>
+            <input name="email" type="email" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
+          </div>
+          <div>
+            <p class="text-xs font-semibold text-ink/60">What would you tag first?</p>
+            <div id="chips" class="mt-2 flex flex-wrap gap-2 text-sm">
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🔑 Keys</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">👛 Wallet</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🎒 Bag</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🧳 Luggage</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🐶 Pet</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🧒 Kid's stuff</button>
+              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">💻 Laptop</button>
+            </div>
+          </div>
+          <button class="w-full bg-ink text-cream font-semibold py-4 rounded-2xl hover:bg-coral transition">Join the waitlist →</button>
+          <p class="text-[11px] text-ink/50 text-center">No spam. We'll only email you about the launch.</p>
+        </form>
+        <div id="join-done" class="hidden text-center py-6">
+          <div class="text-6xl">💛</div>
+          <p class="mt-4 font-serif font-bold text-3xl">You're in!</p>
+          <p id="join-done-text" class="mt-2 text-ink/60"></p>
+          <button id="share-btn" class="mt-6 bg-ink text-cream font-semibold px-6 py-3 rounded-full">Share with a friend</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="faq" class="py-16 md:py-24">
+    <div class="max-w-3xl mx-auto px-5">
+      <h2 class="reveal font-serif font-bold text-4xl md:text-5xl text-center">Good questions</h2>
+      <div class="mt-12 space-y-3">
+        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Does the finder need an app?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">No. They scan with their normal camera and a simple web page opens. If the QR is damaged, they can type the short code printed on the tag.</p></details>
+        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Is it a GPS tracker?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">No, and that's the point. No battery, no charging, nothing to break. It works the moment a kind person finds your item, and we show you where it was scanned if they allow location.</p></details>
+        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Can someone misuse my tag?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Finders never see your contact details. You can pause or disable a tag any time, block anyone in chat, and money requests are blocked automatically.</p></details>
+        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Can I move a tag to a different item?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Yes. Tags are reusable: change what an item is called or move it to something new in a few taps.</p></details>
+        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">When do you launch?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Soon. Waitlist members get first access and a free starter pack.</p></details>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="bg-ink text-cream pt-20 pb-10 overflow-hidden">
+    <div class="max-w-6xl mx-auto px-5">
+      <p class="font-serif font-bold text-[18vw] md:text-[11rem] leading-none tracking-tight">reunivo<span class="text-coral">.</span></p>
+      <div class="mt-10 flex flex-col md:flex-row justify-between gap-4 text-sm text-cream/50">
+        <p>Every lost thing has a way home.</p>
+        <p>© 2026 Reunivo · Made with 💛 in India</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ---------- Hero QR (points to this page) ----------
+    (function () {
+      try {
+        const qr = qrcode(0, 'M');
+        qr.addData(location.protocol.startsWith('http') ? location.href.split('#')[0] : 'https://reunivo.app/f/7K2M');
+        qr.make();
+        document.getElementById('hero-qr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 0, scalable: true });
+      } catch (e) {
+        document.getElementById('hero-qr').innerHTML = '<div class="w-full h-full bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:12px_12px] rounded"></div>';
+      }
+    })();
+
+    // ---------- Mobile menu ----------
+    (function () {
+      const btn = document.getElementById('menu-btn');
+      const menu = document.getElementById('mobile-menu');
+      const set = open => { menu.classList.toggle('open', open); btn.textContent = open ? '✕' : '☰'; btn.setAttribute('aria-expanded', open); };
+      btn.addEventListener('click', () => set(!menu.classList.contains('open')));
+      menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
+    })();
+
+    // ---------- Scroll reveal ----------
+    const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ---------- Film ----------
+    (function () {
+      const stage = document.getElementById('film-stage');
+      // Swap in a real video if VIDEO_URL is set
+      if (VIDEO_URL) {
+        const isFile = /\.(mp4|webm|mov)(\?|$)/i.test(VIDEO_URL);
+        stage.innerHTML = isFile
+          ? `<video src="${VIDEO_URL}" controls playsinline class="w-full h-full object-cover"></video>`
+          : `<iframe src="${VIDEO_URL}" class="w-full h-full" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        return;
+      }
+      const scenes = [...stage.querySelectorAll('.scene')];
+      const PER = 5000; // ms per scene
+      const TOTAL = PER * scenes.length;
+      const caption = document.getElementById('film-caption');
+      const bar = document.getElementById('film-bar');
+      const time = document.getElementById('film-time');
+      const toggle = document.getElementById('film-toggle');
+      const overlay = document.getElementById('film-play');
+      let elapsed = 0, playing = false, last = 0, current = -1;
+
+      function show(i) {
+        if (i === current) return;
+        current = i;
+        scenes.forEach((s, k) => s.classList.toggle('active', k === i));
+        caption.textContent = scenes[i].dataset.caption;
+      }
+      function fmt(ms) { const s = Math.floor(ms / 1000); return `0:${String(s).padStart(2, '0')}`; }
+      function tick(t) {
+        if (!playing) return;
+        elapsed += t - last; last = t;
+        if (elapsed >= TOTAL) { elapsed = TOTAL; playing = false; toggle.textContent = '↺'; }
+        show(Math.min(scenes.length - 1, Math.floor(elapsed / PER)));
+        bar.style.width = (elapsed / TOTAL * 100) + '%';
+        time.textContent = fmt(elapsed);
+        if (playing) requestAnimationFrame(tick);
+      }
+      function play() {
+        if (elapsed >= TOTAL) { elapsed = 0; current = -1; }
+        playing = true; overlay.classList.add('hidden'); toggle.textContent = '❚❚';
+        last = performance.now(); requestAnimationFrame(tick);
+      }
+      function pause() { playing = false; toggle.textContent = '▶'; }
+      overlay.addEventListener('click', play);
+      toggle.addEventListener('click', () => (playing ? pause() : play()));
+      show(0); time.textContent = fmt(0);
+    })();
+
+    // ---------- Interactive finder demo ----------
+    (function () {
+      const steps = document.querySelectorAll('[data-step]');
+      const go = s => steps.forEach(el => el.classList.toggle('on', el.dataset.step === s));
+      const alertEl = document.getElementById('owner-alert');
+      const msgEl = document.getElementById('owner-msg');
+      const idle = document.getElementById('owner-idle');
+      const reply = document.getElementById('finder-reply');
+      const done = document.getElementById('finder-done');
+      const replyBtn = document.getElementById('owner-reply');
+
+      function reset() {
+        [alertEl, msgEl, reply, done].forEach(el => el.classList.add('hidden'));
+        idle.classList.remove('hidden'); replyBtn.disabled = false; replyBtn.textContent = 'Reply: hand it to the help desk';
+      }
+      document.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', () => {
+        const target = btn.dataset.go;
+        if (target === 'a') { reset(); go('a'); return; }
+        if (target === 'b') {
+          go('b');
+          setTimeout(() => { go('c'); idle.classList.add('hidden'); alertEl.classList.remove('hidden'); }, 1400);
+          return;
+        }
+        if (target === 'd') {
+          const text = document.getElementById('finder-msg').value.trim() || 'I found your wallet!';
+          document.getElementById('finder-sent').textContent = text;
+          document.getElementById('owner-msg-text').textContent = '“' + text + '”';
+          go('d');
+          setTimeout(() => msgEl.classList.remove('hidden'), 600);
+        }
+      }));
+      replyBtn.addEventListener('click', () => {
+        replyBtn.disabled = true; replyBtn.textContent = 'Sent ✓';
+        setTimeout(() => { reply.classList.remove('hidden'); done.classList.remove('hidden'); }, 500);
+      });
+      // live clock on owner phone
+      const clock = document.getElementById('owner-clock');
+      const upd = () => { const d = new Date(); clock.textContent = (d.getHours() % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0'); };
+      upd(); setInterval(upd, 30000);
+    })();
+
+    // ---------- Waitlist ----------
+    (function () {
+      const picked = new Set();
+      document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+        const v = c.textContent.trim();
+        if (picked.has(v)) { picked.delete(v); c.classList.remove('bg-ink', 'text-cream', 'border-ink'); }
+        else { picked.add(v); c.classList.add('bg-ink', 'text-cream', 'border-ink'); }
+      }));
+      const form = document.getElementById('join-form');
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+        data.wants_to_tag = [...picked].join(', ');
+        data.joined_at = new Date().toISOString();
+        const btn = form.querySelector('button[type=submit], button:not([type])');
+        btn.disabled = true; btn.textContent = 'Joining…';
+        if (FORM_ENDPOINT) {
+          try { await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); }
+          catch (err) { console.error(err); }
+        }
+        try { const all = JSON.parse(localStorage.getItem('reunivo-waitlist') || '[]'); all.push(data); localStorage.setItem('reunivo-waitlist', JSON.stringify(all)); } catch {}
+        form.classList.add('hidden');
+        document.getElementById('join-done-text').textContent = `Thanks ${data.name.split(' ')[0]}! We'll email ${data.email} the moment Reunivo launches.`;
+        document.getElementById('join-done').classList.remove('hidden');
+      });
+      document.getElementById('share-btn').addEventListener('click', async () => {
+        const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : 'https://reunivo.app';
+        const share = { title: 'Reunivo', text: 'Every lost thing has a way home. Join the Reunivo waitlist:', url };
+        if (navigator.share) { try { await navigator.share(share); } catch {} }
+        else { try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch { prompt('Copy this link:', url); } }
+      });
+    })();
+  </script>
+</body>
+</html>
