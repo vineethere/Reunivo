@@ -31,6 +31,9 @@
     @media (max-width: 640px) {
       .phone { width: min(260px, 78vw); height: min(520px, 156vw); }
       .card-tilt:hover { transform: none; }
+       .swing {
+    top: 5rem;
+  }
     }
     body { background: #FBF7F0; }
     .grain::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .05;
@@ -86,7 +89,7 @@
        VIDEO_URL: paste a YouTube embed link or an .mp4 path to swap the animated film for a real video.
        See README.md. -->
   <script>
-    const FORM_ENDPOINT = '';
+    const FORM_ENDPOINT = 'https://formspree.io/f/mljbgpky';
     const VIDEO_URL = '';
   </script>
 
@@ -118,7 +121,7 @@
   </header>
 
   <!-- HERO -->
-  <section class="relative overflow-hidden pt-32 pb-12 md:pt-44 md:pb-24">
+  <section class="relative overflow-hidden pt-32 pb-16 md:pt-44 md:pb-24">
     <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-lilac/50 blur-3xl"></div>
     <div class="absolute top-80 -left-32 w-96 h-96 rounded-full bg-sun/40 blur-3xl"></div>
     <div class="relative max-w-6xl mx-auto px-5 grid md:grid-cols-[1.25fr_1fr] gap-10 items-center">
@@ -142,23 +145,37 @@
       </div>
 
       <!-- Swinging tag -->
-      <div class="flex justify-center md:justify-end">
-        <div class="relative h-[380px] sm:h-[420px] w-[280px]">
-          <div class="absolute left-1/2 top-0 w-px h-20 bg-ink/40"></div>
-          <div class="swing absolute left-1/2 -ml-[120px] top-16 w-[240px]">
-            <div class="mx-auto w-5 h-5 rounded-full border-[3px] border-ink/40 bg-cream -mb-2 relative z-10"></div>
-            <div class="bg-ink text-cream rounded-[2rem] p-6 pt-8 shadow-2xl">
-              <div class="flex justify-between items-center text-xs">
-                <span class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></span>
-                <span class="text-cream/50">RV-7K2M</span>
-              </div>
-              <div id="hero-qr" class="mt-4 bg-cream rounded-2xl p-3 aspect-square grid place-items-center"></div>
-              <p class="mt-4 font-serif italic text-xl leading-tight">Found me?<br /><span class="text-coral">Scan me.</span></p>
-              <p class="text-[11px] text-cream/50 mt-2">or visit reunivo.app/f/7K2M</p>
-            </div>
-          </div>
+      <!-- Swinging tag -->
+<div class="flex justify-center md:justify-end">
+  <div class="relative h-[530px] w-[280px]">
+
+    <!-- Hanging string -->
+    <div class="absolute left-1/2 top-0 w-px h-20 bg-ink/40"></div>
+
+    <div class="swing absolute left-1/2 -ml-[120px] top-20 w-[240px]">
+
+      <!-- Connector -->
+      <div class="mx-auto w-5 h-5 rounded-full border-[3px] border-ink/40 bg-cream mb-3 relative z-10"></div>
+
+      <!-- Tag -->
+      <div class="bg-ink text-cream rounded-[2rem] p-6 pt-8 shadow-2xl">
+        <div class="flex justify-between items-center text-xs">
+          <span class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></span>
+          <span class="text-cream/50">RV-7K2M</span>
         </div>
+
+        <div id="hero-qr" class="mt-4 bg-cream rounded-2xl p-3 aspect-square grid place-items-center"></div>
+
+        <p class="mt-4 font-serif italic text-xl leading-tight">
+          Found me?<br /><span class="text-coral">Scan me.</span>
+        </p>
+
+        <p class="text-[11px] text-cream/50 mt-2">or visit reunivo.app/f/7K2M</p>
       </div>
+
+    </div>
+  </div>
+</div>
     </div>
   </section>
 
@@ -533,7 +550,9 @@
         <p class="mt-6 text-white/85 text-lg max-w-md">Early members get a free starter pack of tags at launch.</p>
       </div>
       <div class="reveal bg-cream text-ink rounded-[2rem] p-5 sm:p-7 shadow-2xl">
-        <form id="join-form" class="space-y-4">
+        <form id="join-form" action="https://formspree.io/f/mljbgpky" method="POST" class="space-y-4">
+          <input type="hidden" name="_subject" value="New Reunivo waitlist sign-up" />
+          <input type="hidden" name="wants_to_tag" id="wants-to-tag" value="" />
           <div>
             <label class="text-xs font-semibold text-ink/60">Your name</label>
             <input name="name" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
@@ -555,6 +574,7 @@
             </div>
           </div>
           <button class="w-full bg-ink text-cream font-semibold py-4 rounded-2xl hover:bg-coral transition">Join the waitlist →</button>
+          <p id="join-error" class="hidden text-sm text-coral text-center font-medium" role="alert"></p>
           <p class="text-[11px] text-ink/50 text-center">No spam. We'll only email you about the launch.</p>
         </form>
         <div id="join-done" class="hidden text-center py-6">
@@ -714,6 +734,7 @@
         const v = c.textContent.trim();
         if (picked.has(v)) { picked.delete(v); c.classList.remove('bg-ink', 'text-cream', 'border-ink'); }
         else { picked.add(v); c.classList.add('bg-ink', 'text-cream', 'border-ink'); }
+        document.getElementById('wants-to-tag').value = [...picked].join(', ');
       }));
       const form = document.getElementById('join-form');
       form.addEventListener('submit', async e => {
@@ -722,10 +743,24 @@
         data.wants_to_tag = [...picked].join(', ');
         data.joined_at = new Date().toISOString();
         const btn = form.querySelector('button[type=submit], button:not([type])');
+        const errEl = document.getElementById('join-error');
+        const btnText = btn.textContent;
+        errEl.classList.add('hidden');
         btn.disabled = true; btn.textContent = 'Joining…';
         if (FORM_ENDPOINT) {
-          try { await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) }); }
-          catch (err) { console.error(err); }
+          try {
+            const res = await fetch(FORM_ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(data) });
+            if (!res.ok) {
+              const body = await res.json().catch(() => ({}));
+              throw new Error((body.errors || []).map(x => x.message).join(' ') || 'Formspree returned ' + res.status);
+            }
+          } catch (err) {
+            console.error(err);
+            errEl.textContent = 'Sorry, that didn\'t go through. Please check your connection and try again.';
+            errEl.classList.remove('hidden');
+            btn.disabled = false; btn.textContent = btnText;
+            return;
+          }
         }
         try { const all = JSON.parse(localStorage.getItem('reunivo-waitlist') || '[]'); all.push(data); localStorage.setItem('reunivo-waitlist', JSON.stringify(all)); } catch {}
         form.classList.add('hidden');

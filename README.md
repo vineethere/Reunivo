@@ -14,15 +14,12 @@ One static page (`index.html`). No install, no build. Double-click it to open.
 9. **Waitlist**: name, email, and "what would you tag first?" chips.
 10. **FAQ** and footer.
 
-## 1. Receive sign-ups (free, 5 minutes)
-Right now, sign-ups are only saved in the visitor's own browser. To get them by email:
-1. Make a free account at https://formspree.io and create a form.
-2. Copy its URL (like `https://formspree.io/f/abcd1234`).
-3. Open `index.html` in a text editor and find, near the top:
-   `const FORM_ENDPOINT = '';`
-4. Paste the URL between the quotes and save.
+## 1. Receiving sign-ups (Formspree)
+Sign-ups go to Formspree: `https://formspree.io/f/mljbgpky`. It's set in two places in `index.html`: `const FORM_ENDPOINT = ...` near the top, and the `action` on `<form id="join-form">`. To switch forms, change both.
 
-Each sign-up then arrives by email, including what they'd tag first. You can export the list as CSV from Formspree.
+Each sign-up sends the name, email, what they'd tag first (`wants_to_tag`) and the time (`joined_at`). If sending fails, the visitor sees an error and can try again. You can export the list as CSV from Formspree.
+
+Formspree may ask you to confirm the form (via an email link) the first time it receives a submission.
 
 ## 2. Use a real video instead of the animated film (optional)
 On the same config lines near the top, set `VIDEO_URL`:
