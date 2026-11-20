@@ -3,756 +3,1182 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reunivo — Every lost thing has a way home</title>
-  <meta name="description" content="Reunivo smart tags bring lost things back. Anyone can scan, nobody sees your number, and you know the moment it's found. Join the waitlist." />
-  <meta property="og:title" content="Reunivo — Every lost thing has a way home" />
-  <meta property="og:description" content="Smart lost & found tags. Scan with any phone. Your number stays private." />
+  <title>Reunivo · Someone found your keys. Now they can tell you.</title>
+  <meta name="description" content="Reunivo tags put a private message button on anything you own. A finder scans it with any phone camera, writes to you, and never sees your number. Join the waitlist." />
+  <meta property="og:title" content="Reunivo · Someone found your keys. Now they can tell you." />
+  <meta property="og:description" content="A private message button for the things you own. Finders scan, you hear from them, your number stays yours." />
+  <meta name="theme-color" content="#E9EEF5" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;1,9..144,500;1,9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: { cream: '#FBF7F0', ink: '#14121F', coral: '#FF5A36', mint: '#2EC4A0', lilac: '#CDB4FF', sun: '#FFD166' },
-          fontFamily: { sans: ['Inter', 'sans-serif'], serif: ['Fraunces', 'serif'] },
-        },
-      },
-    };
-  </script>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=Kalam:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    html { scroll-behavior: smooth; }
-    html, body { overflow-x: clip; max-width: 100%; }
-    section[id], #join { scroll-margin-top: 5.5rem; }
-    /* Mobile menu */
-    #mobile-menu { display: none; }
-    #mobile-menu.open { display: block; animation: rise .3s ease-out both; }
-    @media (max-width: 640px) {
-      .phone { width: min(260px, 78vw); height: min(520px, 156vw); }
-      .card-tilt:hover { transform: none; }
-       .swing {
-    top: 5rem;
-  }
+    :root {
+      --paper: #E9EEF5;      /* chalk-blue page */
+      --sheet: #FFFFFF;      /* tickets, cards */
+      --ink: #1F2547;        /* indigo text */
+      --ink-soft: #565C7E;   /* secondary text */
+      --line: #C9D2E3;       /* rules, borders */
+      --marigold: #F2A007;   /* the one accent */
+      --leaf: #1E8A5A;       /* "returned" */
+      --rose: #E0527A;       /* "lost" */
+      --shelf: #2B3263;      /* shelf wood, deep indigo */
+      --hand: 'Kalam', cursive;
+      --sans: 'Bricolage Grotesque', system-ui, sans-serif;
+      --wrap: 1160px;
     }
-    body { background: #FBF7F0; }
-    .grain::before { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 60; opacity: .05;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; background: var(--paper); color: var(--ink);
+      font-family: var(--sans); font-size: 17px; line-height: 1.55;
+      font-variation-settings: 'opsz' 14; overflow-x: clip;
+    }
+    img, svg { display: block; max-width: 100%; }
+    a { color: inherit; }
+    button, input, textarea { font: inherit; color: inherit; }
+    :focus-visible { outline: 3px solid var(--marigold); outline-offset: 3px; border-radius: 6px; }
+    .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 22px; }
+    section[id] { scroll-margin-top: 80px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-    /* Swinging hero tag */
-    @keyframes swing { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
-    .swing { animation: swing 4.5s ease-in-out infinite; transform-origin: 50% 0; }
+    /* Type scale (1.25 ratio) */
+    h1, h2, h3 { margin: 0; font-weight: 750; line-height: 1.04; letter-spacing: -0.02em; font-variation-settings: 'opsz' 96, 'wdth' 82; }
+    h1 { font-size: clamp(2.5rem, 5.4vw, 4.4rem); }
+    h2 { font-size: clamp(2rem, 4.2vw, 3.3rem); }
+    h3 { font-size: 1.3rem; font-variation-settings: 'opsz' 32, 'wdth' 90; letter-spacing: -0.01em; }
+    p { margin: 0; }
+    .lede { font-size: clamp(1.08rem, 1.6vw, 1.25rem); color: var(--ink-soft); max-width: 34em; }
+    .hand { font-family: var(--hand); }
 
-    /* Marquee */
-    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-    .marquee { animation: marquee 32s linear infinite; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5em;
+      border: 0; cursor: pointer; text-decoration: none; font-weight: 650;
+      background: var(--ink); color: #fff; padding: .85em 1.4em; border-radius: 999px;
+      transition: background .2s, transform .2s;
+    }
+    .btn:hover { background: #2E3668; transform: translateY(-1px); }
+    .btn--gold { background: var(--marigold); color: var(--ink); }
+    .btn--gold:hover { background: #FFB420; }
+    .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
 
-    /* Scroll reveal */
-    .reveal { opacity: 0; transform: translateY(28px); transition: all .8s cubic-bezier(.2,.7,.2,1); }
-    .reveal.in { opacity: 1; transform: none; }
+    /* ---------- Nav ---------- */
+    .nav { position: sticky; top: 0; z-index: 30; background: color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+    .nav.scrolled { border-bottom-color: var(--line); }
+    .nav .wrap { display: flex; align-items: center; gap: 28px; height: 68px; }
+    .mark { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 800; font-size: 1.35rem; letter-spacing: -0.03em; font-variation-settings: 'opsz' 48, 'wdth' 80; }
+    .mark svg { width: 30px; height: 30px; }
+    .nav-links { display: flex; gap: 24px; margin-left: auto; font-weight: 550; color: var(--ink-soft); }
+    .nav-links a { text-decoration: none; }
+    .nav-links a:hover { color: var(--ink); }
+    .nav .btn { padding: .6em 1.15em; font-size: .95rem; }
+    @media (max-width: 760px) { .nav-links { display: none; } .nav .btn { margin-left: auto; } }
 
-    /* Film */
-    .scene { position: absolute; inset: 0; opacity: 0; transition: opacity .7s ease; pointer-events: none; }
-    .scene.active { opacity: 1; }
-    .scene.active .pop { animation: pop .7s cubic-bezier(.2,1.4,.4,1) both; }
-    .scene.active .drop { animation: drop .8s cubic-bezier(.2,1.3,.4,1) .4s both; }
-    .scene.active .walk { animation: walk 3.2s ease-in .6s both; }
-    .scene.active .tagon { animation: tagon 1s cubic-bezier(.2,1.4,.4,1) .7s both; }
-    .scene.active .scanline { animation: scanline 1.4s ease-in-out .6s infinite; }
-    .scene.active .rise { animation: rise .8s ease-out both; }
-    .scene.active .rise2 { animation: rise .8s ease-out .5s both; }
-    .scene.active .confetti i { animation: confetti 2.6s ease-out both; }
-    @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    @keyframes drop { from { transform: translateY(-120%); opacity: 0; } to { transform: none; opacity: 1; } }
-    @keyframes walk { from { transform: translateX(0); opacity: 1; } to { transform: translateX(260%); opacity: 0; } }
-    @keyframes tagon { from { transform: translate(80px,-80px) rotate(40deg); opacity: 0; } to { transform: none; opacity: 1; } }
-    @keyframes scanline { 0%,100% { top: 8%; } 50% { top: 84%; } }
-    @keyframes rise { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
-    @keyframes confetti { from { transform: translateY(0) rotate(0); opacity: 1; } to { transform: translateY(var(--y)) translateX(var(--x)) rotate(540deg); opacity: 0; } }
+    /* ---------- Hero ---------- */
+    .hero { padding: 56px 0 40px; }
+    .hero-grid { display: grid; grid-template-columns: 1fr; gap: 44px; }
+    .hero h1 { max-width: 13ch; }
+    .hero .lede { margin-top: 22px; }
+    .hero-cta { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+    .hero-cta .quiet { font-weight: 600; text-decoration: none; border-bottom: 2px solid var(--marigold); padding-bottom: 2px; }
+    @media (min-width: 980px) {
+      .hero { padding: 80px 0 64px; }
+      .hero-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: center; gap: 56px; }
+    }
 
-    /* Demo phones */
-    .phone { width: 260px; height: 520px; border-radius: 2.6rem; background: #14121F; padding: 10px; box-shadow: 0 30px 60px -20px rgba(20,18,31,.45); }
-    .phone > .screen { width: 100%; height: 100%; border-radius: 2.1rem; overflow: hidden; position: relative; }
-    .step { display: none; }
-    .step.on { display: flex; animation: rise .5s ease-out both; }
-    @keyframes ping { 0% { transform: scale(1); opacity: .7; } 100% { transform: scale(2.2); opacity: 0; } }
-    .ping::after { content: ''; position: absolute; inset: 0; border-radius: 9999px; background: #FF5A36; animation: ping 1.6s infinite; z-index: -1; }
+    /* ---------- The city of threads (the memorable thing) ---------- */
+    .city { position: relative; min-width: 0; }
+    .city-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+    .city-head h2 { font-size: 1.25rem; font-variation-settings: 'opsz' 24, 'wdth' 90; letter-spacing: -0.01em; }
+    .city-head p { font-family: var(--hand); color: var(--ink-soft); font-size: 1.05rem; }
+    .map { position: relative; border-radius: 22px; overflow: hidden; background: #171C44; aspect-ratio: 600 / 440; box-shadow: 0 30px 60px -30px rgba(23,28,68,.7); }
+    .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .map .road { stroke: #4A5294; stroke-width: 1.4; stroke-dasharray: 5 8; }
+    .map .label { fill: #8E96C7; font: 600 11px 'Bricolage Grotesque', sans-serif; }
+    .map .who { fill: #C3C8E4; font: 700 12px 'Kalam', cursive; }
+    .map .pane { fill: #3B4380; transition: fill .4s; }
+    .map .house.lit .pane { fill: #FFC24B; filter: url(#glow); }
+    .map .thread { fill: none; stroke: var(--marigold); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; filter: url(#glow); }
+    .map .thread.done { stroke-width: 2.2; opacity: .55; }
+    .map .spark { fill: #FFE3A3; filter: url(#glow); }
+    .thing {
+      position: absolute; translate: -50% -50%; border: 0; background: none; padding: 4px; cursor: pointer;
+      font-size: clamp(1.35rem, 3.4vw, 2.1rem); line-height: 1; filter: drop-shadow(0 3px 4px rgba(0,0,0,.55));
+      transition: opacity .5s, transform .25s; border-radius: 50%;
+    }
+    .thing:hover { transform: scale(1.18) rotate(-6deg); }
+    .thing::before { /* the tag on every thing */
+      content: ''; position: absolute; right: 2px; bottom: 4px; width: 9px; height: 9px; border-radius: 3px;
+      background: #fff; box-shadow: 0 0 0 2px var(--marigold);
+    }
+    .thing::after { content: ''; position: absolute; inset: -40%; border-radius: 50%; border: 2px solid var(--marigold); opacity: 0; pointer-events: none; }
+    .thing.scanning::after { animation: ping .8s ease-out 2; }
+    @keyframes ping { 0% { opacity: .95; scale: .5; } 100% { opacity: 0; scale: 1.7; } }
+    .thing.home { opacity: .3; cursor: default; }
+    .thing.home:hover { transform: none; }
+    .map-bubble {
+      position: absolute; z-index: 2; max-width: 48%; pointer-events: none;
+      background: #fff; color: var(--ink); font-family: var(--hand); font-size: clamp(.74rem, 1.7vw, .95rem); line-height: 1.2;
+      padding: 7px 11px; border-radius: 12px; box-shadow: 0 10px 24px -10px rgba(0,0,0,.6);
+      animation: bubble .45s cubic-bezier(.3,1.5,.5,1) both;
+    }
+    @keyframes bubble { from { opacity: 0; scale: .6; } to { opacity: 1; scale: 1; } }
+    .city-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+    .tally { font-weight: 650; }
+    .tally b { font-variant-numeric: tabular-nums; color: var(--ink); }
+    .reset { background: none; border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; color: var(--ink-soft); }
+    .reset:hover { border-color: var(--ink); color: var(--ink); }
 
-    .card-tilt { transition: transform .4s cubic-bezier(.2,.7,.2,1); }
-    .card-tilt:hover { transform: translateY(-6px) rotate(-1.2deg); }
+    /* the route card that opens when an item goes home */
+    .route {
+      margin-top: 14px; background: var(--sheet); border-radius: 16px; padding: 18px 20px;
+      border: 1px solid var(--line); min-height: 152px;
+    }
+    .route-empty { color: var(--ink-soft); font-family: var(--hand); font-size: 1.15rem; display: grid; place-items: center; text-align: center; min-height: 116px; }
+    .route h3 { font-size: 1.15rem; }
+    .route ol { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+    .route li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; }
+    .route li span:first-child { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: .72rem; font-weight: 750; background: var(--paper); color: var(--ink); margin-top: 1px; }
+    .route li:last-child span:first-child { background: var(--leaf); color: #fff; }
+    .route li b { font-weight: 650; }
+    .route-note { margin-top: 12px; font-family: var(--hand); font-size: 1.05rem; color: var(--ink-soft); border-top: 1px dashed var(--line); padding-top: 10px; }
+    .route .reveal-line { opacity: 0; translate: 0 6px; }
+    .route.play .reveal-line { opacity: 1; translate: 0 0; transition: opacity .35s, translate .35s; }
+    .route.play .reveal-line:nth-child(2) { transition-delay: .25s; }
+    .route.play .reveal-line:nth-child(3) { transition-delay: .5s; }
+    .route.play .reveal-line:nth-child(4) { transition-delay: .75s; }
+    .shelf-foot { margin-top: 10px; font-size: .85rem; color: var(--ink-soft); }
+
+    /* ---------- Section rhythm ---------- */
+    .section { padding: 84px 0; }
+    .section-head { max-width: 40em; margin-bottom: 40px; }
+    .section-head .lede { margin-top: 14px; }
+    @media (max-width: 640px) { .section { padding: 64px 0; } }
+
+    /* ---------- Both ends of one scan (demo) ---------- */
+    .ends { background: var(--ink); color: #fff; }
+    .ends .lede { color: #C3C8E4; }
+    .ends-grid { display: grid; grid-template-columns: 1fr; gap: 28px; justify-items: center; }
+    @media (min-width: 860px) { .ends-grid { grid-template-columns: 1fr auto 1fr; align-items: center; } }
+    .ends-join { font-family: var(--hand); font-size: 1.15rem; color: var(--marigold); text-align: center; max-width: 12em; }
+    .phone-label { font-weight: 650; color: #C3C8E4; margin-bottom: 12px; text-align: center; }
+    .phone { width: min(280px, 84vw); height: 540px; border-radius: 40px; background: #0F1330; padding: 10px; box-shadow: 0 30px 60px -24px rgba(0,0,0,.6); }
+    .screen { width: 100%; height: 100%; border-radius: 31px; overflow: hidden; position: relative; background: var(--paper); color: var(--ink); }
+    .step { display: none; height: 100%; flex-direction: column; padding: 22px 18px; }
+    .step.on { display: flex; animation: rise .35s ease-out both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .step .big { font-size: 4.6rem; text-align: center; margin: 40px 0 10px; }
+    .step h3 { font-size: 1.25rem; text-align: center; }
+    .step .muted { color: var(--ink-soft); font-size: .9rem; text-align: center; margin-top: 4px; }
+    .step .btn { margin-top: auto; width: 100%; }
+    .scan-view { background: #0F1330; color: #fff; align-items: center; justify-content: center; position: relative; }
+    .scan-view .frame { position: absolute; inset: 26% 18%; border: 3px solid var(--marigold); border-radius: 18px; }
+    .scan-view .bar { position: absolute; left: 20%; right: 20%; height: 2px; background: var(--marigold); box-shadow: 0 0 12px var(--marigold); animation: scan 1.2s ease-in-out infinite; }
+    @keyframes scan { 0%,100% { top: 30%; } 50% { top: 70%; } }
+    .finder-card { background: var(--sheet); border-radius: 16px; padding: 14px; border: 1px solid var(--line); margin-top: 12px; }
+    .finder-card .hand { font-size: 1.15rem; font-weight: 700; }
+    .tiny { font-size: .76rem; color: var(--ink-soft); }
+    .step label { font-size: .8rem; font-weight: 650; margin-top: 14px; }
+    .step textarea { margin-top: 6px; width: 100%; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px; font-size: .9rem; resize: none; background: #fff; }
+    .step textarea:focus { outline: none; border-color: var(--ink); }
+    .bubble { max-width: 86%; padding: 10px 12px; border-radius: 16px; font-size: .9rem; margin-top: 8px; }
+    .bubble.me { margin-left: auto; background: var(--ink); color: #fff; border-bottom-right-radius: 4px; }
+    .bubble.them { background: var(--sheet); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+    .thanks-note { margin-top: auto; background: color-mix(in srgb, var(--leaf) 14%, white); color: var(--leaf); font-weight: 650; text-align: center; border-radius: 12px; padding: 10px; font-size: .85rem; }
+    .linkish { background: none; border: 0; text-decoration: underline; color: var(--ink-soft); cursor: pointer; font-size: .82rem; margin-top: 10px; }
+    .owner { background: linear-gradient(180deg, #343C7A, #1B2045); color: #fff; padding: 26px 12px; }
+    .clock { text-align: center; font-size: 3.4rem; font-weight: 300; font-variant-numeric: tabular-nums; letter-spacing: -0.03em; }
+    .day { text-align: center; color: #C3C8E4; font-size: .85rem; }
+    .notes { margin-top: 26px; display: grid; gap: 8px; }
+    .note { background: rgba(255,255,255,.95); color: var(--ink); border-radius: 18px; padding: 11px 13px; font-size: .86rem; animation: drop .45s cubic-bezier(.3,1.4,.5,1) both; }
+    .note small { display: block; color: var(--ink-soft); font-size: .7rem; font-weight: 650; }
+    .note .btn { margin-top: 8px; width: 100%; padding: .55em 1em; font-size: .82rem; }
+    @keyframes drop { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: none; } }
+    .idle { text-align: center; color: #9EA5CF; font-size: .85rem; padding-top: 40px; }
+    [hidden] { display: none !important; }
+
+    /* ---------- Tag maker ---------- */
+    .maker-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; align-items: start; }
+    @media (max-width: 959px) { .maker-grid > div:last-child { order: -1; } .maker-cta { justify-content: center; text-align: center; } }
+    @media (min-width: 960px) { .maker-grid { grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr); gap: 56px; } }
+    .maker-form { display: grid; gap: 22px; }
+    .maker-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+    .maker-form legend, .maker-form label { font-weight: 650; font-size: .95rem; margin-bottom: 8px; display: block; }
+    .maker-form .hint { font-weight: 400; color: var(--ink-soft); font-size: .85rem; }
+    .pick-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pick { border: 1.5px solid var(--line); background: #fff; border-radius: 14px; padding: 8px 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; font-size: .95rem; }
+    .pick[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: #fff; }
+    .maker-form input[type=text], .maker-form textarea {
+      width: 100%; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; padding: 11px 13px;
+      font-family: var(--hand); font-size: 1.2rem; resize: none;
+    }
+    .maker-form input[type=text]:focus, .maker-form textarea:focus { outline: none; border-color: var(--ink); }
+    .note-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-top: 6px; }
+    .note-count { font-size: .82rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+    .note-ideas { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .idea { border: 0; background: color-mix(in srgb, var(--marigold) 22%, white); color: #5A4200; border-radius: 999px; padding: 4px 11px; font-size: .85rem; cursor: pointer; }
+    .idea:hover { background: color-mix(in srgb, var(--marigold) 40%, white); }
+    .swatches { display: flex; gap: 10px; }
+    .swatch { width: 38px; height: 38px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 1.5px var(--line); cursor: pointer; }
+    .swatch[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--ink); }
+    .toggle { display: flex; align-items: center; gap: 10px; font-weight: 500 !important; cursor: pointer; }
+    .toggle input { width: 18px; height: 18px; accent-color: var(--ink); }
+
+    .maker-stage { display: grid; grid-template-columns: minmax(0, 1fr); gap: 22px; justify-items: center; }
+    @media (min-width: 560px) { .maker-stage { grid-template-columns: auto auto; align-items: center; justify-content: center; gap: 30px; } }
+    .stage-label { font-family: var(--hand); color: var(--ink-soft); text-align: center; margin-bottom: 10px; font-size: 1.05rem; }
+    /* the physical tag */
+    .mytag-wrap { display: grid; justify-items: center; }
+    .mytag-string { width: 2px; height: 34px; background: var(--ink-soft); }
+    .mytag {
+      --tag: #F2A007; --tag-ink: #1F2547;
+      width: 190px; border-radius: 26px; padding: 22px 18px 18px; background: var(--tag); color: var(--tag-ink);
+      box-shadow: 0 22px 40px -20px rgba(31,37,71,.6); transition: background .3s, color .3s; position: relative;
+    }
+    .mytag::before { content: ''; position: absolute; top: 10px; left: 50%; translate: -50% 0; width: 14px; height: 14px; border-radius: 50%; background: var(--paper); box-shadow: inset 0 0 0 2px rgba(0,0,0,.15); }
+    .mytag-top { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-weight: 750; font-size: .95rem; font-variation-settings: 'wdth' 85; }
+    .mytag-top span:last-child { font-family: var(--hand); font-weight: 700; font-size: .9rem; opacity: .75; }
+    .mytag-code { margin-top: 12px; background: #fff; border-radius: 14px; padding: 12px; display: grid; place-items: center; }
+    .mytag-code svg { width: 100%; height: auto; }
+    .mytag-line { margin-top: 12px; font-family: var(--hand); font-weight: 700; font-size: 1.15rem; line-height: 1.15; }
+    .mytag-sub { font-size: .75rem; opacity: .75; margin-top: 4px; }
+    /* the finder's phone */
+    .mini-phone { width: 230px; border-radius: 34px; background: #0F1330; padding: 9px; box-shadow: 0 26px 50px -26px rgba(0,0,0,.6); }
+    .mini-screen { border-radius: 26px; background: var(--paper); min-height: 390px; padding: 18px 15px; display: flex; flex-direction: column; }
+    .mini-screen .mark { font-size: 1rem; }
+    .mini-screen .mark svg { width: 22px; height: 22px; }
+    .mini-card { margin-top: 12px; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 13px; }
+    .mini-card .big-emoji { font-size: 2.2rem; line-height: 1; }
+    .mini-card .belongs { margin-top: 8px; font-weight: 700; line-height: 1.2; }
+    .mini-note { margin-top: 10px; background: color-mix(in srgb, var(--tag, #F2A007) 20%, white); border-radius: 12px; padding: 10px 12px; font-family: var(--hand); font-size: 1.05rem; line-height: 1.25; word-wrap: break-word; transition: background .3s; }
+    .mini-note:empty { display: none; }
+    .mini-safe { margin-top: 10px; font-size: .74rem; color: var(--ink-soft); }
+    .mini-btn { margin-top: auto; background: var(--ink); color: #fff; text-align: center; border-radius: 999px; padding: 10px; font-weight: 650; font-size: .88rem; }
+    .maker-cta { margin-top: 30px; display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+    .maker-cta p { color: var(--ink-soft); font-size: .92rem; max-width: 28em; }
+
+    /* ---------- Opening: one big tag, cut loose ---------- */
+    html.intro-on body { overflow: hidden; }
+    .intro {
+      position: fixed; inset: 0; z-index: 100; background: var(--paper);
+      display: grid; place-items: start center; overflow: hidden; cursor: pointer;
+      transition: opacity .6s ease .1s, visibility 0s linear .7s;
+    }
+    .intro.gone { opacity: 0; visibility: hidden; pointer-events: none; }
+    .intro-rig { position: relative; display: grid; justify-items: center; transform-origin: 50% 0; animation: introSway 3.2s ease-in-out infinite; }
+    @keyframes introSway { 0%,100% { rotate: -4deg; } 50% { rotate: 4deg; } }
+    .intro-string { width: 3px; height: 22vh; background: var(--ink); position: relative; }
+    .intro-string .half { position: absolute; left: 0; width: 3px; background: var(--ink); height: 50%; }
+    .intro-string .half.a { top: 0; } .intro-string .half.b { bottom: 0; }
+    .intro-tag {
+      width: min(300px, 70vw); border-radius: 40px; background: var(--marigold); color: var(--ink);
+      padding: 34px 28px 28px; position: relative; box-shadow: 0 40px 70px -30px rgba(31,37,71,.55);
+    }
+    .intro-tag::before { content: ''; position: absolute; top: 14px; left: 50%; translate: -50% 0; width: 20px; height: 20px; border-radius: 50%; background: var(--paper); box-shadow: inset 0 0 0 3px rgba(0,0,0,.12); }
+    .intro-tag .mark { font-size: 1.4rem; margin-top: 10px; }
+    .intro-tag .mark svg { width: 30px; height: 30px; }
+    .intro-code { margin-top: 18px; background: #fff; border-radius: 22px; padding: 20px; }
+    .intro-code svg { width: 100%; height: auto; }
+    .intro-tag p { margin-top: 16px; font-family: var(--hand); font-weight: 700; font-size: 1.5rem; line-height: 1.15; }
+    .intro-skip { position: absolute; bottom: 26px; left: 50%; translate: -50% 0; font-size: .9rem; color: var(--ink-soft); background: none; border: 0; cursor: pointer; text-decoration: underline; }
+    /* the cut */
+    .intro.cut .intro-rig { animation: none; rotate: 0deg; transition: rotate .2s; }
+    .intro.cut .half.a { animation: snapUp .7s cubic-bezier(.2,.8,.3,1) forwards; }
+    .intro.cut .half.b, .intro.cut .intro-tag { animation: fallAway 1.1s cubic-bezier(.55,0,.75,.2) .08s forwards; }
+    .intro.cut .intro-scissor { opacity: 1; animation: snip .3s ease-out forwards; }
+    @keyframes snapUp { to { translate: 0 -40%; scale: 1 .4; opacity: 0; } }
+    @keyframes fallAway { to { translate: 40px 120vh; rotate: 28deg; } }
+    .intro-scissor { position: absolute; left: 50%; top: 11vh; translate: -50% -50%; font-size: 2rem; opacity: 0; pointer-events: none; }
+    @keyframes snip { 0% { scale: 1.4; } 100% { scale: 1; opacity: 0; } }
+
+    /* ---------- Trust: take a tag apart ---------- */
+    .trust { background: var(--ink); color: #fff; }
+    .trust .lede { color: #C3C8E4; }
+    .trust-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
+    @media (min-width: 940px) { .trust-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; } }
+    .stack { position: relative; height: 420px; perspective: 1100px; }
+    @media (max-width: 939px) { .trust-grid > .stack { order: 1; } }
+    .layer {
+      position: absolute; left: 50%; top: 50%; width: 250px; height: 300px; margin: -150px 0 0 -125px;
+      border-radius: 30px; transform-style: preserve-3d;
+      transform: rotateX(56deg) rotateZ(-34deg) translateZ(var(--z, 0px));
+      transition: transform .8s cubic-bezier(.3,1.2,.5,1), opacity .4s;
+      display: grid; place-items: center; text-align: center;
+    }
+    .layer span { font-family: var(--hand); font-weight: 700; font-size: 1.15rem; padding: 0 22px; opacity: 0; transition: opacity .3s .4s; }
+    .layer.l1 { background: var(--marigold); color: var(--ink); }
+    .layer.l2 { background: #fff; color: var(--ink); }
+    .layer.l3 { background: #3B4380; color: #fff; outline: 2px dashed #8E96C7; outline-offset: -14px; }
+    .layer.l4 { background: transparent; border: 2px dashed #8E96C7; color: #C3C8E4; }
+    .layer.l2 svg { width: 62%; height: auto; }
+    .stack[data-step="0"] .layer { --z: 0px; }
+    .stack[data-step="0"] .l1 { --z: 12px; } .stack[data-step="0"] .l2 { --z: 8px; } .stack[data-step="0"] .l3 { --z: 4px; }
+    .stack:not([data-step="0"]) .l1 { --z: 150px; } .stack:not([data-step="0"]) .l2 { --z: 70px; } .stack:not([data-step="0"]) .l3 { --z: -10px; } .stack:not([data-step="0"]) .l4 { --z: -90px; }
+    .stack:not([data-step="0"]) .layer span { opacity: 1; }
+    .stack[data-step="1"] .layer:not(.l1),
+    .stack[data-step="2"] .layer:not(.l2),
+    .stack[data-step="3"] .layer:not(.l3),
+    .stack[data-step="4"] .layer:not(.l4) { opacity: .28; }
+    .stack:not([data-step="0"]) .layer.l2 span { position: absolute; bottom: 18px; font-size: .95rem; }
+    .stack-hint { position: absolute; left: 50%; bottom: 6px; translate: -50% 0; font-family: var(--hand); color: var(--marigold); font-size: 1.1rem; white-space: nowrap; }
+    @media (max-width: 520px) {
+      .stack { height: 340px; }
+      .layer { width: 190px; height: 230px; margin: -115px 0 0 -95px; }
+      .layer span { font-size: .95rem; padding: 0 14px; }
+    }
+    .layers-list { list-style: none; padding: 0; margin: 28px 0 0; display: grid; gap: 10px; }
+    .layer-btn {
+      width: 100%; text-align: left; cursor: pointer; border: 1.5px solid #3B4380; background: transparent; color: #fff;
+      border-radius: 16px; padding: 14px 16px; display: grid; grid-template-columns: 30px 1fr; gap: 12px; align-items: start;
+      transition: background .2s, border-color .2s;
+    }
+    .layer-btn:hover { border-color: #8E96C7; }
+    .layer-btn[aria-pressed="true"] { background: #2B3263; border-color: var(--marigold); }
+    .layer-btn .dot { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-weight: 750; font-size: .85rem; background: #3B4380; }
+    .layer-btn[aria-pressed="true"] .dot { background: var(--marigold); color: var(--ink); }
+    .layer-btn b { display: block; font-weight: 650; }
+    .layer-btn small { display: block; color: #C3C8E4; font-size: .92rem; margin-top: 3px; line-height: 1.45; }
+    .layer-btn small { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+    .layer-btn[aria-pressed="true"] small { max-height: 9em; }
+    .trust-proof { margin-top: 26px; background: #2B3263; border-radius: 18px; padding: 18px 20px; }
+    .trust-proof p:first-child { font-weight: 650; }
+    .trust-proof code { font-family: ui-monospace, Menlo, monospace; background: #171C44; color: var(--marigold); padding: 3px 8px; border-radius: 6px; font-size: .9rem; word-break: break-all; }
+    .trust-proof p + p { margin-top: 8px; color: #C3C8E4; font-size: .95rem; }
+    .promises { margin-top: 64px; display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 28px 36px; border-top: 1px solid #3B4380; padding-top: 36px; }
+    .promises h3 { font-size: 1.15rem; color: var(--marigold); }
+    .promises p { margin-top: 8px; color: #C3C8E4; font-size: .97rem; }
+
+    /* ---------- Tags ---------- */
+    .tags { background: #DDE4EF; }
+    .tag-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border-top: 2px solid var(--ink); }
+    .tag { padding: 26px 22px 30px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 76px 1fr; gap: 16px; align-items: start; }
+    .tag-art { width: 76px; height: 76px; display: grid; place-items: center; }
+    .tag p { color: var(--ink-soft); margin-top: 6px; font-size: .97rem; }
+    .tag-facts { margin-top: 26px; color: var(--ink-soft); }
+
+    /* ---------- Waitlist: the claim ticket ---------- */
+    .claim { background: var(--marigold); }
+    .claim-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; align-items: center; }
+    @media (min-width: 940px) { .claim-grid { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); gap: 64px; } }
+    .claim h2 { max-width: 12ch; }
+    .claim .lede { color: #4A3A12; margin-top: 18px; }
+    .joined { margin-top: 26px; display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,.55); border-radius: 999px; padding: 8px 18px 8px 8px; font-weight: 600; }
+    .joined b { background: var(--ink); color: #fff; border-radius: 999px; padding: 4px 12px; font-variant-numeric: tabular-nums; }
+
+    .ticket-form {
+      position: relative; background: var(--sheet); border-radius: 22px; padding: 30px 28px 26px;
+      box-shadow: 0 24px 50px -28px rgba(31,37,71,.55);
+      /* perforated stub edge */
+      -webkit-mask: radial-gradient(circle 11px at 0 92px, transparent 98%, #000) left / 51% 100% no-repeat,
+                    radial-gradient(circle 11px at 100% 92px, transparent 98%, #000) right / 51% 100% no-repeat;
+              mask: radial-gradient(circle 11px at 0 92px, transparent 98%, #000) left / 51% 100% no-repeat,
+                    radial-gradient(circle 11px at 100% 92px, transparent 98%, #000) right / 51% 100% no-repeat;
+    }
+    .ticket-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding-bottom: 22px; border-bottom: 2px dashed var(--line); margin-bottom: 22px; min-height: 70px; }
+    .ticket-top .t-title { font-weight: 750; font-size: 1.2rem; font-variation-settings: 'opsz' 32, 'wdth' 85; }
+    .ticket-top .t-sub { color: var(--ink-soft); font-size: .9rem; }
+    .ticket-no { text-align: right; }
+    .ticket-no small { display: block; color: var(--ink-soft); font-size: .8rem; }
+    .ticket-no span { font-family: var(--hand); font-size: 1.9rem; font-weight: 700; line-height: 1; color: var(--rose); }
+    .field { display: grid; gap: 6px; margin-bottom: 16px; }
+    .field label, .field-label { font-size: .9rem; font-weight: 650; }
+    .field input { border: 0; border-bottom: 2px solid var(--line); padding: 8px 2px; font-family: var(--hand); font-size: 1.35rem; background: transparent; border-radius: 0; }
+    .field input:focus { outline: none; border-bottom-color: var(--ink); }
+    .field input::placeholder { color: #B3BBCD; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip { border: 1.5px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 13px; cursor: pointer; font-size: .92rem; transition: background .15s, border-color .15s; }
+    .chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .ticket-form .btn { width: 100%; margin-top: 10px; padding: 1em; font-size: 1.05rem; }
+    .form-error { color: #B3264F; font-weight: 600; text-align: center; margin-top: 12px; }
+    .fine { text-align: center; font-size: .82rem; color: var(--ink-soft); margin-top: 12px; }
+    .done { text-align: center; padding: 18px 0 6px; }
+    .done .stamp-big {
+      display: inline-block; border: 4px solid var(--leaf); color: var(--leaf); border-radius: 12px; padding: 6px 18px;
+      font-weight: 800; font-size: 1.8rem; rotate: -8deg; font-variation-settings: 'wdth' 75;
+      animation: stampin .45s cubic-bezier(.3,1.6,.5,1) both;
+    }
+    @keyframes stampin { from { scale: 2; opacity: 0; } to { scale: 1; opacity: 1; } }
+    .done h3 { margin-top: 18px; font-size: 1.6rem; }
+    .done p { color: var(--ink-soft); margin-top: 8px; }
+    .done .count-line { margin-top: 16px; display: inline-block; background: var(--paper); border-radius: 999px; padding: 7px 16px; font-weight: 650; color: var(--ink); }
+    .done .btn { width: auto; margin-top: 22px; }
+
+    /* ---------- FAQ ---------- */
+    .faq-list { max-width: 760px; }
+    .faq-list details { border-bottom: 1px solid var(--line); }
+    .faq-list summary { cursor: pointer; list-style: none; padding: 20px 40px 20px 0; font-weight: 650; font-size: 1.12rem; position: relative; }
+    .faq-list summary::-webkit-details-marker { display: none; }
+    .faq-list summary::after { content: '+'; position: absolute; right: 6px; top: 50%; translate: 0 -50%; font-size: 1.5rem; font-weight: 400; transition: rotate .2s; }
+    .faq-list details[open] summary::after { rotate: 45deg; }
+    .faq-list details p { padding: 0 40px 22px 0; color: var(--ink-soft); max-width: 36em; }
+
+    /* ---------- Footer ---------- */
+    .foot { padding: 56px 0 40px; border-top: 1px solid var(--line); }
+    .foot-grid { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 24px; }
+    .foot .mark { font-size: 1.6rem; }
+    .foot p { color: var(--ink-soft); font-size: .92rem; }
+    .foot .hand { font-size: 1.25rem; color: var(--ink); margin-top: 8px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
   </style>
 </head>
-<body class="grain text-ink font-sans antialiased overflow-x-hidden">
-
-  <!-- ============ CONFIG ============
-       Waitlist sign-ups go to SilentForms (see the <form id="join-form"> below).
-       SIGNUP_COUNT_MIN: the waitlist counter ("128 people have joined") only shows once at least this many have signed up.
-       VIDEO_URL: paste a YouTube embed link or an .mp4 path to swap the animated film for a real video.
-       See README.md. -->
+<body>
+  <!-- ============ OPENING: one big tag, cut loose ============ -->
   <script>
-    const VIDEO_URL = '';
+    // Every load (including a reload) starts fresh: at the top of the page, with the opening animation.
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (location.hash) history.replaceState(null, '', location.pathname + location.search);
+    window.scrollTo(0, 0);
+    if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('intro-on');
+  </script>
+  <div class="intro" id="intro" role="presentation" hidden>
+    <div class="intro-rig">
+      <div class="intro-string"><span class="half a"></span><span class="half b"></span></div>
+      <div class="intro-tag">
+        <div class="mark"><svg aria-hidden="true"><use href="#mark"/></svg>reunivo</div>
+        <div class="intro-code" id="intro-code"></div>
+        <p>Every lost thing is tied to someone.</p>
+      </div>
+    </div>
+    <span class="intro-scissor" aria-hidden="true">✂️</span>
+    <button class="intro-skip" type="button" id="intro-skip">Skip</button>
+  </div>
+
+  <!-- ============ SETTINGS ============
+       Waitlist sign-ups go to SilentForms (see the <form id="join-form"> below).
+       SIGNUP_COUNT_MIN: the "people already on the list" line and the ticket number only show
+       once at least this many people have signed up. The count comes from /api/signups (src/signups.js). -->
+  <script>
     const SIGNUP_COUNT_MIN = 25;
   </script>
 
-  <!-- NAV -->
-  <header class="fixed top-0 inset-x-0 z-40">
-    <div class="max-w-6xl mx-auto mt-4 px-4">
-      <div class="flex items-center justify-between bg-cream/80 backdrop-blur-md border border-ink/10 rounded-full pl-4 sm:pl-5 pr-2 py-2">
-        <a href="#" class="font-serif font-bold text-xl sm:text-2xl tracking-tight">reunivo<span class="text-coral">.</span></a>
-        <nav class="hidden md:flex gap-7 text-sm font-medium text-ink/70">
-          <a href="#film" class="hover:text-coral">Watch</a>
-          <a href="#try" class="hover:text-coral">Try it</a>
-          <a href="#tags" class="hover:text-coral">Tags</a>
-          <a href="#privacy" class="hover:text-coral">Privacy</a>
-          <a href="#faq" class="hover:text-coral">FAQ</a>
-        </nav>
-        <div class="flex items-center gap-2">
-          <a href="#join" class="bg-ink text-cream text-sm font-semibold px-4 sm:px-5 py-2.5 rounded-full hover:bg-coral transition whitespace-nowrap">Join waitlist</a>
-          <button id="menu-btn" class="md:hidden w-10 h-10 rounded-full border border-ink/15 grid place-items-center text-lg" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-menu">☰</button>
-        </div>
-      </div>
-      <nav id="mobile-menu" class="md:hidden mt-2 bg-cream/95 backdrop-blur-md border border-ink/10 rounded-3xl p-2 shadow-xl">
-        <a href="#film" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Watch the film</a>
-        <a href="#try" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Try it</a>
-        <a href="#tags" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Tags</a>
-        <a href="#privacy" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">Privacy</a>
-        <a href="#faq" class="block px-4 py-3 rounded-2xl font-medium hover:bg-ink/5">FAQ</a>
+  <!-- Brand mark: a claim-ticket loop that turns back on itself (the way home) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mark" viewBox="0 0 32 32">
+      <rect x="2" y="6" width="28" height="20" rx="5" fill="#1F2547"/>
+      <circle cx="9" cy="16" r="2.4" fill="#E9EEF5"/>
+      <path d="M15 20.5c0-4 2.4-6 5.5-6h2.3m0 0-2.4-2.4m2.4 2.4-2.4 2.4" stroke="#F2A007" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
+  <header class="nav" id="nav">
+    <div class="wrap">
+      <a class="mark" href="#top"><svg aria-hidden="true"><use href="#mark"/></svg>reunivo</a>
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#both-ends">See a return</a>
+        <a href="#make">Make a tag</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#tags">Tags</a>
+        <a href="#faq">Questions</a>
       </nav>
+      <a class="btn" href="#join">Join the waitlist</a>
     </div>
   </header>
 
-  <!-- HERO -->
-  <section class="relative overflow-hidden pt-32 pb-16 md:pt-44 md:pb-24">
-    <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-lilac/50 blur-3xl"></div>
-    <div class="absolute top-80 -left-32 w-96 h-96 rounded-full bg-sun/40 blur-3xl"></div>
-    <div class="relative max-w-6xl mx-auto px-5 grid md:grid-cols-[1.25fr_1fr] gap-10 items-center">
-      <div>
-        <p class="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-ink/60">
-          <span class="w-2 h-2 rounded-full bg-coral relative ping"></span> Coming soon · Pre-launch
-        </p>
-        <h1 class="mt-5 font-serif font-bold text-[2.6rem] leading-[1.04] sm:text-[3.3rem] md:text-[5.4rem] tracking-tight">
-          Every lost thing<br />has a <em class="text-coral">way home.</em>
-        </h1>
-        <p class="mt-5 md:mt-6 text-base sm:text-lg md:text-xl text-ink/70 max-w-lg">
-          Reunivo tags turn any stranger into a helper. They scan with a phone camera, you get an instant alert, and your number stays private. No app for them. No battery for you.
-        </p>
-        <div class="mt-9 flex flex-wrap items-center gap-4">
-          <a href="#join" class="bg-coral text-white font-semibold px-7 py-4 rounded-full shadow-lg shadow-coral/30 hover:-translate-y-0.5 transition">Get early access</a>
-          <a href="#film" class="group flex items-center gap-3 font-semibold">
-            <span class="w-12 h-12 rounded-full border-2 border-ink grid place-items-center group-hover:bg-ink group-hover:text-cream transition">▶</span>
-            Watch the 30-sec film
-          </a>
-        </div>
-      </div>
-
-      <!-- Swinging tag -->
-      <!-- Swinging tag -->
-<div class="flex justify-center md:justify-end">
-  <div class="relative h-[530px] w-[280px]">
-
-    <!-- Hanging string -->
-    <div class="absolute left-1/2 top-0 w-px h-20 bg-ink/40"></div>
-
-    <div class="swing absolute left-1/2 -ml-[120px] top-20 w-[240px]">
-
-      <!-- Connector -->
-      <div class="mx-auto w-5 h-5 rounded-full border-[3px] border-ink/40 bg-cream mb-3 relative z-10"></div>
-
-      <!-- Tag -->
-      <div class="bg-ink text-cream rounded-[2rem] p-6 pt-8 shadow-2xl">
-        <div class="flex justify-between items-center text-xs">
-          <span class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></span>
-          <span class="text-cream/50">RV-7K2M</span>
+  <main id="top">
+    <!-- ============ HERO + LOST PROPERTY SHELF ============ -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <h1>Someone found your keys. Now they can tell you.</h1>
+          <p class="lede">Reunivo tags put a private message button on anything you own. A finder scans it with any phone camera, writes to you, and never sees your number.</p>
+          <div class="hero-cta">
+            <a class="btn btn--gold" href="#join">Join the waitlist</a>
+            <a class="quiet" href="#both-ends">Watch a return happen</a>
+          </div>
         </div>
 
-        <div id="hero-qr" class="mt-4 bg-cream rounded-2xl p-3 aspect-square grid place-items-center"></div>
-
-        <p class="mt-4 font-serif italic text-xl leading-tight">
-          Found me?<br /><span class="text-coral">Scan me.</span>
-        </p>
-
-        <p class="text-[11px] text-cream/50 mt-2">or visit reunivo.app/f/7K2M</p>
+        <div class="city" aria-labelledby="city-title">
+          <div class="city-head">
+            <h2 id="city-title">Tonight in the city</h2>
+            <p>tap a lost thing to pull its thread</p>
+          </div>
+          <div class="map" id="map">
+            <svg id="map-svg" viewBox="0 0 600 440" role="img" aria-label="An illustrated city at night with six lost things. Each one is joined to its owner's home by a thread that lights up when it's found.">
+              <defs>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="2.4" result="b"/>
+                  <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <g id="map-base"></g>
+              <g id="map-threads"></g>
+              <g id="map-homes"></g>
+            </svg>
+          </div>
+          <div class="city-foot">
+            <p class="tally" id="tally" aria-live="polite"><b>0</b> of 6 things home tonight</p>
+            <button class="reset" type="button" id="reset-night" hidden>Lose them all again</button>
+          </div>
+          <div class="route" id="route" aria-live="polite">
+            <p class="route-empty">Every lost thing here is tied to its owner by a thread.<br />Tap one and watch it find the way back.</p>
+          </div>
+          <p class="shelf-foot">An illustrated example of how returns work. Reunivo hasn't launched yet.</p>
+        </div>
       </div>
+    </section>
 
-    </div>
-  </div>
-</div>
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <section class="border-y border-ink/10 bg-ink text-cream py-4 overflow-hidden">
-    <div class="marquee flex w-max gap-10 font-serif italic text-xl md:text-2xl whitespace-nowrap">
-      <span>keys ✦ wallets ✦ backpacks ✦ laptops ✦ earbuds ✦ pet collars ✦ kids' bottles ✦ suitcases ✦ umbrellas ✦ cameras ✦ water bottles ✦ jackets ✦ school bags ✦ </span>
-      <span>keys ✦ wallets ✦ backpacks ✦ laptops ✦ earbuds ✦ pet collars ✦ kids' bottles ✦ suitcases ✦ umbrellas ✦ cameras ✦ water bottles ✦ jackets ✦ school bags ✦ </span>
-    </div>
-  </section>
-
-  <!-- PROBLEM -->
-  <section class="py-16 md:py-24">
-    <div class="max-w-5xl mx-auto px-5 text-center reveal">
-      <p class="text-xs font-semibold tracking-widest uppercase text-coral">The problem</p>
-      <h2 class="mt-4 font-serif font-bold text-4xl md:text-6xl leading-tight">Most people <em>want</em> to return what they find.<br /><span class="text-ink/40">They just have no way to reach you.</span></h2>
-      <div class="mt-10 md:mt-14 grid md:grid-cols-3 gap-5 text-left">
-        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">🤷</p><p class="mt-4 font-semibold">No name, no number</p><p class="text-ink/60 text-sm mt-1">A finder holds your bag and has no idea who it belongs to.</p></div>
-        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">😬</p><p class="mt-4 font-semibold">Labels expose you</p><p class="text-ink/60 text-sm mt-1">Writing your phone number on things invites spam and strangers.</p></div>
-        <div class="bg-white rounded-3xl p-7 border border-ink/5"><p class="text-3xl">💸</p><p class="mt-4 font-semibold">Trackers are costly</p><p class="text-ink/60 text-sm mt-1">GPS trackers cost thousands, need charging, and don't fit everything.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- FILM -->
-  <section id="film" class="py-16 md:py-20 bg-ink text-cream relative overflow-hidden">
-    <div class="absolute -bottom-40 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-coral/20 blur-3xl rounded-full"></div>
-    <div class="relative max-w-5xl mx-auto px-5">
-      <div class="text-center reveal">
-        <p class="text-xs font-semibold tracking-widest uppercase text-sun">The film</p>
-        <h2 class="mt-3 font-serif font-bold text-4xl md:text-5xl">A backpack's journey home, in 30 seconds.</h2>
-      </div>
-
-      <div id="film-wrap" class="mt-12 reveal">
-        <div id="film-stage" class="relative aspect-[4/5] sm:aspect-video rounded-3xl sm:rounded-[2rem] overflow-hidden bg-[#1E1B2E] shadow-2xl ring-1 ring-white/10 select-none">
-
-          <!-- Scene 1: tag it -->
-          <div class="scene" data-caption="1 · Stick a Reunivo tag on anything you love.">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#2A2440] to-[#1E1B2E]"></div>
-            <div class="absolute inset-0 grid place-items-center">
-              <div class="relative pop">
-                <div class="text-[9rem] md:text-[12rem] leading-none">🎒</div>
-                <div class="tagon absolute -right-6 top-6 bg-cream text-ink rounded-xl px-3 py-2 shadow-xl rotate-6">
-                  <p class="font-serif font-bold text-sm">reunivo<span class="text-coral">.</span></p>
-                  <div class="w-12 h-12 mt-1 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:8px_8px] rounded"></div>
+    <!-- ============ BOTH ENDS OF ONE SCAN (interactive demo) ============ -->
+    <section class="section ends" id="both-ends">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Both ends of one scan</h2>
+          <p class="lede">You found a wallet with a Reunivo tag. Scan it on the left and watch the owner's phone on the right.</p>
+        </div>
+        <div class="ends-grid">
+          <div>
+            <p class="phone-label">The finder</p>
+            <div class="phone"><div class="screen">
+              <div class="step on" data-step="a">
+                <div class="big" aria-hidden="true">👛</div>
+                <h3>You found a wallet</h3>
+                <p class="muted">There's a small tag on the zip.</p>
+                <button class="btn" type="button" data-go="b">Scan the tag</button>
+              </div>
+              <div class="step scan-view" data-step="b">
+                <div class="big" aria-hidden="true" style="margin:0">👛</div>
+                <div class="frame"></div><div class="bar"></div>
+                <p class="tiny" style="position:absolute;bottom:40px;color:#C3C8E4">Opening the tag…</p>
+              </div>
+              <div class="step" data-step="c">
+                <div class="mark" style="font-size:1.1rem"><svg aria-hidden="true" style="width:24px;height:24px"><use href="#mark"/></svg>reunivo</div>
+                <div class="finder-card">
+                  <p class="hand">This wallet belongs to Aarav.</p>
+                  <p class="tiny" style="margin-top:4px">His number and address stay private. Your message reaches him straight away.</p>
                 </div>
+                <label for="finder-msg">Write to Aarav</label>
+                <textarea id="finder-msg" rows="4">Hi! Found your wallet near Gate 3 of the metro station. Where should I leave it?</textarea>
+                <button class="btn" type="button" data-go="d">Send to Aarav</button>
+              </div>
+              <div class="step" data-step="d">
+                <div class="mark" style="font-size:1.1rem"><svg aria-hidden="true" style="width:24px;height:24px"><use href="#mark"/></svg>reunivo</div>
+                <p class="tiny">Private chat with Aarav</p>
+                <div class="bubble me" id="finder-sent"></div>
+                <div class="bubble them" id="finder-reply" hidden>Thank you so much! Could you hand it to the station help desk? I'll be there in 20 minutes.</div>
+                <p class="thanks-note" id="finder-done" hidden>You just brought something home. Thank you.</p>
+                <button class="linkish" type="button" data-go="a">Start again</button>
+              </div>
+            </div></div>
+          </div>
+
+          <p class="ends-join" aria-hidden="true">one scan, two phones, no numbers swapped</p>
+
+          <div>
+            <p class="phone-label">The owner</p>
+            <div class="phone"><div class="screen owner">
+              <p class="clock" id="owner-clock">9:41</p>
+              <p class="day" id="owner-day">Saturday</p>
+              <div class="notes">
+                <div class="note" id="owner-alert" hidden><small>Reunivo · now</small>Your wallet was just scanned near Rajiv Chowk metro.</div>
+                <div class="note" id="owner-msg" hidden><small>Reunivo · message from the finder</small><span id="owner-msg-text"></span><button class="btn btn--gold" type="button" id="owner-reply">Reply: leave it at the help desk</button></div>
+                <p class="idle" id="owner-idle">Nothing new. Your things are where you left them.</p>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ TAG MAKER ============ -->
+    <section class="section" id="make">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Write what a stranger will read</h2>
+          <p class="lede">Every tag carries a short note from you to whoever finds it. Write yours and see it on your tag and on the finder's phone as you type.</p>
+        </div>
+        <div class="maker-grid">
+          <form class="maker-form" id="maker" onsubmit="return false">
+            <fieldset>
+              <legend>What are you tagging?</legend>
+              <div class="pick-row" id="maker-items">
+                <button type="button" class="pick" aria-pressed="true" data-emoji="🔑" data-noun="keys" data-chip="🔑 Keys">🔑 Keys</button>
+                <button type="button" class="pick" aria-pressed="false" data-emoji="👛" data-noun="wallet" data-chip="👛 Wallet">👛 Wallet</button>
+                <button type="button" class="pick" aria-pressed="false" data-emoji="🎒" data-noun="bag" data-chip="🎒 Bag">🎒 Bag</button>
+                <button type="button" class="pick" aria-pressed="false" data-emoji="🧳" data-noun="suitcase" data-chip="🧳 Luggage">🧳 Suitcase</button>
+                <button type="button" class="pick" aria-pressed="false" data-emoji="🐶" data-noun="dog" data-chip="🐶 Pet">🐶 Dog</button>
+                <button type="button" class="pick" aria-pressed="false" data-emoji="💻" data-noun="laptop" data-chip="💻 Laptop">💻 Laptop</button>
+              </div>
+            </fieldset>
+            <div>
+              <label for="maker-name">Your first name <span class="hint">(only this part of you is shown)</span></label>
+              <input type="text" id="maker-name" maxlength="16" value="Aarav" autocomplete="given-name" />
+              <label class="toggle" style="margin-top:10px"><input type="checkbox" id="maker-hide" /> Don't show my name at all</label>
+            </div>
+            <div>
+              <label for="maker-note">Your note to the finder</label>
+              <textarea id="maker-note" rows="3" maxlength="90">These keys open my whole life. Please message me, chai's on me!</textarea>
+              <div class="note-row"><span class="hint">Try one:</span><span class="note-count" id="maker-count">0 / 90</span></div>
+              <div class="note-ideas">
+                <button type="button" class="idea">Reward for its return!</button>
+                <button type="button" class="idea">My grandmother gave me this.</button>
+                <button type="button" class="idea">I'm usually near Gate 3.</button>
+                <button type="button" class="idea">He's friendly and loves biscuits.</button>
               </div>
             </div>
-          </div>
+            <fieldset>
+              <legend>Tag colour</legend>
+              <div class="swatches" id="maker-colors">
+                <button type="button" class="swatch" aria-pressed="true" aria-label="Marigold" data-bg="#F2A007" data-ink="#1F2547" style="background:#F2A007"></button>
+                <button type="button" class="swatch" aria-pressed="false" aria-label="Indigo" data-bg="#1F2547" data-ink="#FFFFFF" style="background:#1F2547"></button>
+                <button type="button" class="swatch" aria-pressed="false" aria-label="Rose" data-bg="#E0527A" data-ink="#FFFFFF" style="background:#E0527A"></button>
+                <button type="button" class="swatch" aria-pressed="false" aria-label="Leaf" data-bg="#1E8A5A" data-ink="#FFFFFF" style="background:#1E8A5A"></button>
+                <button type="button" class="swatch" aria-pressed="false" aria-label="Chalk" data-bg="#FFFFFF" data-ink="#1F2547" style="background:#FFFFFF"></button>
+              </div>
+            </fieldset>
+          </form>
 
-          <!-- Scene 2: lost -->
-          <div class="scene" data-caption="2 · Life happens. It gets left behind at a café.">
-            <div class="absolute inset-0 bg-gradient-to-b from-[#3B2F2A] to-[#1E1B2E]"></div>
-            <div class="absolute bottom-[18%] inset-x-0 h-1 bg-white/10"></div>
-            <div class="absolute bottom-[19%] left-[22%] text-7xl md:text-8xl pop">🪑</div>
-            <div class="absolute bottom-[30%] left-[25%] text-4xl md:text-5xl pop">🎒</div>
-            <div class="absolute bottom-[19%] left-[42%] text-7xl md:text-8xl walk">🚶</div>
-            <div class="absolute top-[12%] right-[10%] text-5xl opacity-70 pop">☕</div>
-          </div>
-
-          <!-- Scene 3: scanned -->
-          <div class="scene" data-caption="3 · Someone kind scans it with their normal camera. No app.">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#1F3A3A] to-[#1E1B2E]"></div>
-            <div class="absolute inset-0 grid place-items-center">
-              <div class="relative pop w-[44%] sm:w-[28%] aspect-[9/17] bg-ink rounded-[1.6rem] p-2 ring-1 ring-white/20">
-                <div class="relative w-full h-full rounded-[1.2rem] bg-[#0b0a12] overflow-hidden grid place-items-center">
-                  <div class="text-5xl md:text-7xl">🎒</div>
-                  <div class="absolute inset-[18%] border-2 border-sun rounded-xl"></div>
-                  <div class="scanline absolute left-[18%] right-[18%] h-0.5 bg-sun shadow-[0_0_14px_#FFD166]"></div>
-                  <p class="absolute bottom-3 text-[10px] md:text-xs text-cream/70">Scanning…</p>
+          <div>
+            <div class="maker-stage" aria-live="polite">
+              <div class="mytag-wrap">
+                <p class="stage-label">your tag</p>
+                <div class="mytag-string" aria-hidden="true"></div>
+                <div class="mytag" id="mytag">
+                  <div class="mytag-top"><span>reunivo</span><span id="mytag-code-id">RV-7K2M</span></div>
+                  <div class="mytag-code" id="mytag-qr" aria-hidden="true"></div>
+                  <p class="mytag-line" id="mytag-line">Found my keys?</p>
+                  <p class="mytag-sub">Scan with any phone camera</p>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Scene 4: alert -->
-          <div class="scene" data-caption="4 · You know instantly. Where, when, and a message.">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#2A2440] to-[#3A1F2A]"></div>
-            <div class="absolute inset-0 grid place-items-center px-6">
-              <div class="w-full max-w-md space-y-3">
-                <div class="drop bg-cream text-ink rounded-2xl p-4 shadow-2xl flex gap-3 items-start">
-                  <div class="w-10 h-10 shrink-0 rounded-xl bg-coral text-white grid place-items-center">🔔</div>
-                  <div><p class="font-semibold text-sm md:text-base">Your backpack was just scanned</p><p class="text-xs md:text-sm text-ink/60">Near Blue Tokai Café · just now</p></div>
-                </div>
-                <div class="rise2 bg-white/10 backdrop-blur rounded-2xl p-4 text-sm md:text-base">
-                  <p class="text-cream/60 text-xs mb-1">Message from the finder</p>
-                  “Hey! Found your bag by the window seat. I've left it with the café counter 🙂”
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Scene 5: reunited -->
-          <div class="scene" data-caption="5 · Reunited. No numbers shared, no awkward calls.">
-            <div class="absolute inset-0 bg-gradient-to-br from-coral to-[#C2361A]"></div>
-            <div class="confetti absolute inset-0 overflow-hidden">
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-sun" style="--x:-220px;--y:-160px"></i>
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-cream" style="--x:200px;--y:-180px"></i>
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-mint" style="--x:-160px;--y:140px"></i>
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-lilac" style="--x:240px;--y:120px"></i>
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-sun" style="--x:60px;--y:-220px"></i>
-              <i class="absolute left-1/2 top-1/2 w-2 h-3 bg-cream" style="--x:-60px;--y:200px"></i>
-            </div>
-            <div class="absolute inset-0 grid place-items-center text-center">
               <div>
-                <div class="pop text-7xl md:text-[9rem] leading-none">🎒💛</div>
-                <p class="rise2 mt-4 font-serif font-bold text-3xl md:text-5xl text-white">Back where it belongs.</p>
+                <p class="stage-label">what the finder sees</p>
+                <div class="mini-phone"><div class="mini-screen">
+                  <div class="mark"><svg aria-hidden="true"><use href="#mark"/></svg>reunivo</div>
+                  <div class="mini-card">
+                    <div class="big-emoji" id="mini-emoji" aria-hidden="true">🔑</div>
+                    <p class="belongs" id="mini-belongs">These keys belong to Aarav.</p>
+                  </div>
+                  <p class="mini-note" id="mini-note"></p>
+                  <p class="mini-safe">Their phone number and address stay private.</p>
+                  <p class="mini-btn">Message the owner</p>
+                </div></div>
               </div>
             </div>
-          </div>
-
-          <!-- End card -->
-          <div class="scene" data-caption="Reunivo · Every lost thing has a way home.">
-            <div class="absolute inset-0 bg-ink"></div>
-            <div class="absolute inset-0 grid place-items-center text-center px-6">
-              <div class="rise">
-                <p class="font-serif font-bold text-4xl sm:text-5xl md:text-7xl">reunivo<span class="text-coral">.</span></p>
-                <p class="mt-3 font-serif italic text-xl md:text-2xl text-cream/70">Every lost thing has a way home.</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Play overlay -->
-          <button id="film-play" class="absolute inset-0 z-20 grid place-items-center bg-ink/60 backdrop-blur-sm group" aria-label="Play film">
-            <div class="text-center">
-              <span class="mx-auto w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-coral text-white text-2xl sm:text-3xl grid place-items-center shadow-2xl shadow-coral/40 group-hover:scale-110 transition">▶</span>
-              <p class="mt-4 sm:mt-5 font-serif italic text-xl sm:text-2xl">Play the film</p>
-              <p class="text-sm text-cream/60 mt-1">30 seconds · with captions</p>
-            </div>
-          </button>
-
-          <!-- Caption + controls -->
-          <div class="absolute bottom-0 inset-x-0 z-10 p-4 md:p-6 bg-gradient-to-t from-black/70 to-transparent">
-            <p id="film-caption" class="text-center text-sm md:text-lg font-medium mb-3 min-h-[1.5em]"></p>
-            <div class="flex items-center gap-3">
-              <button id="film-toggle" class="w-9 h-9 rounded-full bg-white/15 hover:bg-white/25 grid place-items-center text-sm" aria-label="Play or pause">❚❚</button>
-              <div class="flex-1 h-1.5 rounded-full bg-white/20 overflow-hidden"><div id="film-bar" class="h-full w-0 bg-coral"></div></div>
-              <span id="film-time" class="text-xs tabular-nums text-cream/70 w-10 text-right">0:00</span>
+            <div class="maker-cta">
+              <a class="btn btn--gold" href="#join" id="maker-claim">Save my place for this tag</a>
+              <p>Tags aren't for sale yet. This takes you to the waitlist with your item already ticked.</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="py-16 md:py-24">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="reveal max-w-2xl">
-        <p class="text-xs font-semibold tracking-widest uppercase text-coral">How it works</p>
-        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl leading-tight">Three steps.<br /><em>Zero awkwardness.</em></h2>
-      </div>
-      <div class="mt-10 md:mt-14 grid md:grid-cols-3 gap-6">
-        <div class="reveal card-tilt bg-lilac rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
-          <span class="font-serif font-bold text-7xl text-ink/20">01</span>
-          <h3 class="mt-auto font-serif font-bold text-3xl">Tag it</h3>
-          <p class="mt-2 text-ink/70">Stick a tag, scan it once, and name your item. Takes 20 seconds.</p>
-        </div>
-        <div class="reveal card-tilt bg-sun rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
-          <span class="font-serif font-bold text-7xl text-ink/20">02</span>
-          <h3 class="mt-auto font-serif font-bold text-3xl">Someone scans</h3>
-          <p class="mt-2 text-ink/70">Any phone camera works. The finder sees a friendly page, never your details.</p>
-        </div>
-        <div class="reveal card-tilt bg-mint rounded-[2rem] p-8 min-h-[220px] md:min-h-[300px] flex flex-col">
-          <span class="font-serif font-bold text-7xl text-ink/20">03</span>
-          <h3 class="mt-auto font-serif font-bold text-3xl">You reunite</h3>
-          <p class="mt-2 text-ink/70">Get an alert and a private chat. Arrange the return your way.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TRY IT: interactive demo -->
-  <section id="try" class="py-16 md:py-24 bg-white">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center reveal">
-        <p class="text-xs font-semibold tracking-widest uppercase text-coral">Try it yourself</p>
-        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Be the finder for a minute.</h2>
-        <p class="mt-4 text-ink/60 max-w-xl mx-auto">You found a wallet with a Reunivo tag. Scan it on the left and watch the owner's phone on the right.</p>
-      </div>
-
-      <div class="mt-10 md:mt-14 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-20 reveal">
-        <!-- Finder phone -->
-        <div class="text-center">
-          <p class="text-xs font-semibold uppercase tracking-widest text-ink/50 mb-4">Finder's phone</p>
-          <div class="phone mx-auto"><div class="screen bg-cream">
-            <!-- Step A: found -->
-            <div class="step on flex-col items-center justify-center h-full p-6 text-center" data-step="a">
-              <div class="relative">
-                <div class="text-8xl">👛</div>
-                <div class="absolute -right-4 bottom-0 bg-ink text-cream rounded-lg px-2 py-1 text-[10px] font-bold rotate-6">reunivo.</div>
-              </div>
-              <p class="mt-6 font-serif font-bold text-xl">You found a wallet</p>
-              <p class="text-xs text-ink/60 mt-1">It has a little tag on it…</p>
-              <button data-go="b" class="mt-6 w-full bg-ink text-cream font-semibold py-3 rounded-2xl">📷 Scan the tag</button>
-            </div>
-            <!-- Step B: scanning -->
-            <div class="step flex-col items-center justify-center h-full bg-[#0b0a12] text-cream relative" data-step="b">
-              <div class="text-7xl">👛</div>
-              <div class="absolute inset-[22%] border-2 border-sun rounded-2xl"></div>
-              <p class="absolute bottom-10 text-xs text-cream/70">Scanning…</p>
-            </div>
-            <!-- Step C: finder page -->
-            <div class="step flex-col h-full p-5" data-step="c">
-              <p class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></p>
-              <div class="mt-4 bg-white rounded-2xl p-4 border border-ink/5">
-                <p class="text-3xl">👛</p>
-                <p class="mt-2 font-semibold">This wallet belongs to <span class="text-coral">Aarav</span></p>
-                <p class="text-[11px] text-ink/50 mt-1">🔒 Their number and address stay private.</p>
-              </div>
-              <label class="mt-4 text-[11px] font-semibold text-ink/60">Send Aarav a message</label>
-              <textarea id="finder-msg" rows="3" class="mt-1 w-full text-sm rounded-xl border border-ink/15 p-3 focus:outline-none focus:border-coral">Hi! I found your wallet near Gate 3 of the metro station. Where can I leave it?</textarea>
-              <button data-go="d" class="mt-auto w-full bg-coral text-white font-semibold py-3 rounded-2xl">Send privately</button>
-            </div>
-            <!-- Step D: sent + reply -->
-            <div class="step flex-col h-full p-5" data-step="d">
-              <p class="font-serif font-bold text-lg">reunivo<span class="text-coral">.</span></p>
-              <p class="text-[11px] text-ink/50">Private chat with Aarav</p>
-              <div class="mt-4 space-y-2 text-sm flex-1">
-                <div id="finder-sent" class="ml-auto max-w-[85%] bg-ink text-cream rounded-2xl rounded-br-md p-3"></div>
-                <div id="finder-reply" class="hidden max-w-[85%] bg-white border border-ink/10 rounded-2xl rounded-bl-md p-3">Thank you SO much! 🙏 Could you hand it to the station help desk? I'll pick it up in 20 mins.</div>
-              </div>
-              <div id="finder-done" class="hidden bg-mint/20 text-ink rounded-2xl p-3 text-center text-xs font-semibold">🏅 You just helped someone. Thank you!</div>
-              <button data-go="a" class="mt-3 text-xs font-semibold text-ink/50 underline">Restart demo</button>
-            </div>
-          </div></div>
-        </div>
-
-        <div class="hidden md:block font-serif italic text-ink/30 text-3xl">→</div>
-
-        <!-- Owner phone -->
-        <div class="text-center">
-          <p class="text-xs font-semibold uppercase tracking-widest text-ink/50 mb-4">Owner's phone</p>
-          <div class="phone mx-auto"><div class="screen bg-gradient-to-b from-[#3B2F5C] to-[#14121F] text-cream">
-            <div class="pt-10 text-center">
-              <p class="text-5xl font-light tabular-nums" id="owner-clock">9:41</p>
-              <p class="text-xs text-cream/60 mt-1">Saturday</p>
-            </div>
-            <div class="px-3 mt-8 space-y-2">
-              <div id="owner-alert" class="hidden bg-cream/95 text-ink rounded-2xl p-3 text-left shadow-xl" style="animation: drop .7s cubic-bezier(.2,1.3,.4,1) both">
-                <p class="text-[10px] text-ink/50 font-semibold">REUNIVO · now</p>
-                <p class="text-sm font-semibold">Your wallet was just scanned 📍</p>
-                <p class="text-xs text-ink/60">Near Rajiv Chowk Metro</p>
-              </div>
-              <div id="owner-msg" class="hidden bg-cream/95 text-ink rounded-2xl p-3 text-left shadow-xl" style="animation: drop .7s cubic-bezier(.2,1.3,.4,1) both">
-                <p class="text-[10px] text-ink/50 font-semibold">REUNIVO · Finder message</p>
-                <p id="owner-msg-text" class="text-xs mt-1"></p>
-                <button id="owner-reply" class="mt-2 w-full bg-coral text-white text-xs font-semibold py-2 rounded-xl">Reply: hand it to the help desk</button>
-              </div>
-              <p id="owner-idle" class="text-center text-xs text-cream/40 pt-10">No alerts. Your things are safe.</p>
-            </div>
-          </div></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- USE CASES -->
-  <section class="py-16 md:py-24">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="reveal flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <h2 class="font-serif font-bold text-4xl md:text-6xl leading-tight max-w-xl">Made for the things<br /><em class="text-coral">you'd hate to lose.</em></h2>
-        <p class="text-ink/60 max-w-sm">From your keys to your kid's water bottle to your dog. If it can carry a sticker, it can find its way home.</p>
-      </div>
-      <div class="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">✈️</p><p class="mt-6 font-semibold">Travellers</p><p class="text-sm text-ink/60">Luggage, passports pouches, chargers.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🎓</p><p class="mt-6 font-semibold">Students</p><p class="text-sm text-ink/60">Laptops, ID cards, bags, calculators.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🧒</p><p class="mt-6 font-semibold">Parents</p><p class="text-sm text-ink/60">Bottles, lunch boxes, school bags, toys.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🐶</p><p class="mt-6 font-semibold">Pet parents</p><p class="text-sm text-ink/60">Collar tags that help strangers bring them home.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🔑</p><p class="mt-6 font-semibold">Everyone</p><p class="text-sm text-ink/60">Keys, wallets, umbrellas, jackets.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">🎧</p><p class="mt-6 font-semibold">Gadget lovers</p><p class="text-sm text-ink/60">Earbud cases, cameras, power banks.</p></div>
-        <div class="reveal card-tilt bg-white rounded-3xl p-4 sm:p-6 border border-ink/5"><p class="text-4xl">👵</p><p class="mt-6 font-semibold">Elderly care</p><p class="text-sm text-ink/60">Walking sticks, glasses cases, medicine pouches.</p></div>
-        <div class="reveal card-tilt bg-ink text-cream rounded-3xl p-4 sm:p-6"><p class="text-4xl">🏢</p><p class="mt-6 font-semibold">Teams & events</p><p class="text-sm text-cream/60">Office equipment, event gear. Coming later.</p></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- TAGS -->
-  <section id="tags" class="py-16 md:py-24 bg-ink text-cream">
-    <div class="max-w-6xl mx-auto px-5">
-      <div class="text-center reveal">
-        <p class="text-xs font-semibold tracking-widest uppercase text-sun">The tags</p>
-        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Small. Tough. <em>Battery-free.</em></h2>
-        <p class="mt-4 text-cream/60">Waterproof, scratch-resistant, and they never need charging.</p>
-      </div>
-      <div class="mt-10 md:mt-14 grid sm:grid-cols-2 md:grid-cols-4 gap-5">
-        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
-          <div class="h-40 grid place-items-center"><div class="w-16 h-16 rounded-xl bg-cream grid place-items-center"><div class="w-10 h-10 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:6px_6px]"></div></div></div>
-          <p class="font-serif font-bold text-2xl">Mini sticker</p><p class="text-sm text-cream/60 mt-1">For phones, earbuds, remotes and cards.</p>
-        </div>
-        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
-          <div class="h-40 grid place-items-center"><div class="relative"><div class="w-4 h-4 rounded-full border-2 border-cream/60 mx-auto -mb-1"></div><div class="w-20 h-24 rounded-2xl bg-coral grid place-items-center"><div class="w-12 h-12 bg-cream rounded-md grid place-items-center"><div class="w-8 h-8 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div></div></div></div>
-          <p class="font-serif font-bold text-2xl">Keychain</p><p class="text-sm text-cream/60 mt-1">For keys, bags and zips.</p>
-        </div>
-        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
-          <div class="h-40 grid place-items-center"><div class="w-32 h-20 rounded-2xl bg-sun text-ink p-2 flex gap-2 items-center"><div class="w-14 h-14 bg-cream rounded-md grid place-items-center"><div class="w-10 h-10 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div><p class="font-serif font-bold text-xs leading-tight">Found me?<br />Scan me.</p></div></div>
-          <p class="font-serif font-bold text-2xl">Luggage tag</p><p class="text-sm text-cream/60 mt-1">For suitcases and backpacks.</p>
-        </div>
-        <div class="reveal card-tilt rounded-[2rem] bg-[#1E1B2E] p-6 ring-1 ring-white/10">
-          <div class="h-40 grid place-items-center"><div class="w-20 h-20 rounded-full bg-mint grid place-items-center relative"><span class="absolute -top-2 text-2xl">🐾</span><div class="w-11 h-11 bg-cream rounded-md grid place-items-center"><div class="w-8 h-8 bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:5px_5px]"></div></div></div></div>
-          <p class="font-serif font-bold text-2xl">Pet tag</p><p class="text-sm text-cream/60 mt-1">For collars. Finders can call you through a masked line.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRIVACY -->
-  <section id="privacy" class="py-16 md:py-24">
-    <div class="max-w-5xl mx-auto px-5">
-      <div class="text-center reveal">
-        <p class="text-xs font-semibold tracking-widest uppercase text-coral">Privacy first</p>
-        <h2 class="mt-3 font-serif font-bold text-4xl md:text-6xl">Helpful to strangers.<br /><em>Invisible to creeps.</em></h2>
-      </div>
-      <div class="mt-10 md:mt-14 grid md:grid-cols-2 gap-5">
-        <div class="reveal bg-white rounded-[2rem] p-6 sm:p-8 border border-ink/5">
-          <p class="font-serif font-bold text-2xl">👀 What a finder sees</p>
-          <ul class="mt-5 space-y-3 text-ink/80">
-            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> Your first name, if you choose to show it</li>
-            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> What the item is</li>
-            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> A button to message you privately</li>
-            <li class="flex gap-3"><span class="text-mint font-bold">✓</span> Your note, like "Reward offered"</li>
-          </ul>
-        </div>
-        <div class="reveal bg-ink text-cream rounded-[2rem] p-6 sm:p-8">
-          <p class="font-serif font-bold text-2xl">🔒 What stays hidden</p>
-          <ul class="mt-5 space-y-3 text-cream/80">
-            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your phone number</li>
-            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your email and address</li>
-            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Your surname and photos</li>
-            <li class="flex gap-3"><span class="text-coral font-bold">✕</span> Anything you don't switch on</li>
-          </ul>
-        </div>
-      </div>
-      <p class="reveal mt-6 text-center text-sm text-ink/60">🛡️ Our chat blocks money demands and payment details, so nobody can hold your things for ransom.</p>
-    </div>
-  </section>
-
-  <!-- COMPARISON -->
-  <section class="py-16 md:py-24 bg-white">
-    <div class="max-w-4xl mx-auto px-5">
-      <h2 class="reveal font-serif font-bold text-4xl md:text-5xl text-center">Why not just…</h2>
-      <p class="md:hidden mt-6 text-center text-xs text-ink/40">Swipe the table sideways →</p>
-      <div class="reveal mt-4 md:mt-12 overflow-x-auto -mx-5 px-5">
-        <table class="w-full min-w-[520px] text-left text-sm md:text-base">
-          <thead>
-            <tr class="border-b border-ink/10">
-              <th class="py-4 pr-4 font-medium text-ink/50"></th>
-              <th class="py-4 px-3 font-medium text-ink/50">Name label</th>
-              <th class="py-4 px-3 font-medium text-ink/50">GPS tracker</th>
-              <th class="py-4 px-3 font-serif font-bold text-coral text-lg">Reunivo</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-ink/5">
-            <tr><td class="py-4 pr-4 font-medium">Keeps your number private</td><td class="px-3">✕</td><td class="px-3">✓</td><td class="px-3 font-bold text-coral">✓</td></tr>
-            <tr><td class="py-4 pr-4 font-medium">Finder can message you</td><td class="px-3">Calls only</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
-            <tr><td class="py-4 pr-4 font-medium">No battery or charging</td><td class="px-3">✓</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
-            <tr><td class="py-4 pr-4 font-medium">Works with any phone</td><td class="px-3">✓</td><td class="px-3">Often one brand</td><td class="px-3 font-bold text-coral">✓</td></tr>
-            <tr><td class="py-4 pr-4 font-medium">Cheap enough for everything</td><td class="px-3">✓</td><td class="px-3">✕</td><td class="px-3 font-bold text-coral">✓</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- WAITLIST -->
-  <section id="join" class="py-16 md:py-24 relative overflow-hidden">
-    <div class="absolute inset-0 bg-coral"></div>
-    <div class="absolute -top-20 -right-20 w-96 h-96 rounded-full bg-sun/40 blur-3xl"></div>
-    <div class="relative max-w-5xl mx-auto px-5 grid md:grid-cols-2 gap-12 items-center text-white">
-      <div class="reveal">
-        <h2 class="font-serif font-bold text-[2.6rem] sm:text-5xl md:text-7xl leading-[1.04]">Be first to<br /><em>never lose</em><br />things again.</h2>
-        <p class="mt-6 text-white/85 text-lg max-w-md">Early members get a free starter pack of tags at launch.</p>
-        <!-- Live sign-up counter: filled in from /api/signups (functions/api/signups.js). Hidden until there's a number to show. -->
-        <p id="signup-count" class="hidden mt-6 inline-flex items-center gap-3 bg-white/15 backdrop-blur rounded-full pl-2 pr-5 py-2 text-white font-medium">
-          <span class="w-8 h-8 rounded-full bg-white text-coral grid place-items-center text-sm">💛</span>
-          <span><b id="signup-count-num" class="font-serif text-xl tabular-nums"></b> people have already joined</span>
-        </p>
-      </div>
-      <div class="reveal bg-cream text-ink rounded-[2rem] p-5 sm:p-7 shadow-2xl">
-        <form id="join-form" action="https://silentforms.com/api/submit" method="POST" class="space-y-4">
-          <!-- SilentForms access key: tells SilentForms which inbox gets the sign-up -->
-          <input type="hidden" name="accessKey" value="3af1ee1057c39fb8fe12ba11e6e83eb3c9266385d0cc629122df330655daa658" />
-          <input type="hidden" name="wants_to_tag" id="wants-to-tag" value="" />
-          <!-- Honeypot spam trap: hidden from people, bots fill it in -->
-          <div style="position:absolute;left:-9999px;" aria-hidden="true">
-            <input type="text" name="sf_extra" tabindex="-1" autocomplete="off" />
+    <!-- ============ TRUST: take a tag apart ============ -->
+    <section class="section trust" id="privacy">
+      <div class="wrap">
+        <div class="trust-grid">
+          <div class="stack" id="stack" data-step="0" aria-hidden="true">
+            <div class="layer l4"><span>Inside the tag:<br />nothing about you</span></div>
+            <div class="layer l3"><span>A random ID that points to nothing until you link it</span></div>
+            <div class="layer l2"><svg viewBox="0 0 21 21" id="stack-code" shape-rendering="crispEdges"></svg><span>Just a web address</span></div>
+            <div class="layer l1"><span>The tag you stick on</span></div>
+            <p class="stack-hint" id="stack-hint">pick a layer to take it apart</p>
           </div>
           <div>
-            <label class="text-xs font-semibold text-ink/60">Your name</label>
-            <input name="name" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
-          </div>
-          <div>
-            <label class="text-xs font-semibold text-ink/60">Email</label>
-            <input name="email" type="email" required class="mt-1 w-full rounded-2xl border border-ink/15 bg-white px-4 py-3 focus:outline-none focus:border-coral" />
-          </div>
-          <div>
-            <p class="text-xs font-semibold text-ink/60">What would you tag first?</p>
-            <div id="chips" class="mt-2 flex flex-wrap gap-2 text-sm">
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🔑 Keys</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">👛 Wallet</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🎒 Bag</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🧳 Luggage</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🐶 Pet</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">🧒 Kid's stuff</button>
-              <button type="button" class="chip px-3 py-1.5 rounded-full border border-ink/15">💻 Laptop</button>
+            <h2>Take a tag apart. You won't find you in it.</h2>
+            <p class="lede" style="margin-top:16px">Most stickers with a phone number put your details on the outside. A Reunivo tag carries nothing about you at all. Open it up, layer by layer.</p>
+            <ul class="layers-list" id="layers">
+              <li><button class="layer-btn" type="button" data-step="1" aria-pressed="false"><span class="dot">1</span><span><b>The surface</b><small>Printed with "Found my keys?" and a short tag number. No name, no phone number, no address.</small></span></button></li>
+              <li><button class="layer-btn" type="button" data-step="2" aria-pressed="false"><span class="dot">2</span><span><b>The code</b><small>Decode it and you get one web address, like the one below. That's all it holds.</small></span></button></li>
+              <li><button class="layer-btn" type="button" data-step="3" aria-pressed="false"><span class="dot">3</span><span><b>The ID</b><small>A random string. It means nothing on its own and leads nowhere until you link the tag to your account.</small></span></button></li>
+              <li><button class="layer-btn" type="button" data-step="4" aria-pressed="false"><span class="dot">4</span><span><b>The core</b><small>Empty. Your details stay in your account, and a finder only ever sees what you choose to show, usually just your first name.</small></span></button></li>
+            </ul>
+            <div class="trust-proof">
+              <p>What a decoded tag actually says</p>
+              <p><code id="trust-url">reunivo.app/t/7K2M9QX4</code></p>
+              <p>No name, number or location is in the code. Pause the tag and that address stops working.</p>
             </div>
           </div>
-          <button type="submit" class="w-full bg-ink text-cream font-semibold py-4 rounded-2xl hover:bg-coral transition">Join the waitlist →</button>
-          <p id="join-error" class="hidden text-sm text-coral text-center font-medium" role="alert"></p>
-          <p class="text-[11px] text-ink/50 text-center">No spam. We'll only email you about the launch.</p>
-        </form>
-        <div id="join-done" class="hidden text-center py-6" role="status">
-          <div class="text-6xl">💛</div>
-          <p class="mt-4 font-serif font-bold text-3xl">You're in!</p>
-          <p id="join-done-text" class="mt-2 text-ink/60"></p>
-          <p id="join-done-count" class="hidden mt-4 inline-block bg-ink/5 rounded-full px-4 py-2 text-sm font-semibold"></p>
-          <div><button id="share-btn" type="button" class="mt-6 bg-ink text-cream font-semibold px-6 py-3 rounded-full">Share with a friend</button></div>
+        </div>
+
+        <div class="promises">
+          <div><h3>Finders stay anonymous too</h3><p>A finder doesn't need an account, an app or a phone number to help. Kindness shouldn't cost anyone their privacy.</p></div>
+          <div><h3>You control every tag</h3><p>Pause it, block a finder, or wipe it clean whenever you like. A paused tag shows nothing at all.</p></div>
+          <div><h3>Nothing to ransom</h3><p>Messages that ask for money or payment details are blocked, so nobody can hold your things hostage.</p></div>
+          <div><h3>Your data isn't the product</h3><p>We make money from tags, not from you. We won't sell or share your details, or show you ads.</p></div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FAQ -->
-  <section id="faq" class="py-16 md:py-24">
-    <div class="max-w-3xl mx-auto px-5">
-      <h2 class="reveal font-serif font-bold text-4xl md:text-5xl text-center">Good questions</h2>
-      <div class="mt-12 space-y-3">
-        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Does the finder need an app?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">No. They scan with their normal camera and a simple web page opens. If the QR is damaged, they can type the short code printed on the tag.</p></details>
-        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Is it a GPS tracker?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">No, and that's the point. No battery, no charging, nothing to break. It works the moment a kind person finds your item, and we show you where it was scanned if they allow location.</p></details>
-        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Can someone misuse my tag?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Finders never see your contact details. You can pause or disable a tag any time, block anyone in chat, and money requests are blocked automatically.</p></details>
-        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">Can I move a tag to a different item?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Yes. Tags are reusable: change what an item is called or move it to something new in a few taps.</p></details>
-        <details class="reveal group bg-white rounded-3xl p-5 sm:p-6 border border-ink/5"><summary class="flex justify-between gap-4 font-semibold cursor-pointer list-none">When do you launch?<span class="group-open:rotate-45 transition text-coral text-xl">+</span></summary><p class="mt-3 text-ink/60">Soon. Waitlist members get first access and a free starter pack.</p></details>
+    <!-- ============ TAGS ============ -->
+    <section class="section tags" id="tags">
+      <div class="wrap">
+        <div class="section-head">
+          <h2>Four sizes, nothing to charge</h2>
+          <p class="lede">Each tag carries a code and a short number a finder can type in if the code gets scratched.</p>
+        </div>
+        <div class="tag-list">
+          <div class="tag">
+            <svg class="tag-art" viewBox="0 0 76 76" aria-hidden="true"><rect x="22" y="22" width="32" height="32" rx="7" fill="#1F2547"/><rect x="29" y="29" width="18" height="18" rx="2" fill="#E9EEF5"/><rect x="33" y="33" width="5" height="5" fill="#1F2547"/><rect x="39" y="39" width="5" height="5" fill="#1F2547"/></svg>
+            <div><h3>Mini sticker</h3><p>For phones, earbud cases, remotes and ID cards.</p></div>
+          </div>
+          <div class="tag">
+            <svg class="tag-art" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="14" r="6" fill="none" stroke="#1F2547" stroke-width="3"/><rect x="20" y="20" width="36" height="46" rx="10" fill="#F2A007"/><rect x="28" y="30" width="20" height="20" rx="3" fill="#fff"/><rect x="32" y="34" width="5" height="5" fill="#1F2547"/><rect x="39" y="41" width="5" height="5" fill="#1F2547"/></svg>
+            <div><h3>Keyring</h3><p>For keys, zips and bag straps.</p></div>
+          </div>
+          <div class="tag">
+            <svg class="tag-art" viewBox="0 0 76 76" aria-hidden="true"><path d="M8 26h48l12 12-12 12H8z" fill="#E0527A"/><circle cx="58" cy="38" r="3" fill="#DDE4EF"/><rect x="14" y="30" width="16" height="16" rx="2" fill="#fff"/><rect x="17" y="33" width="4" height="4" fill="#1F2547"/><rect x="23" y="39" width="4" height="4" fill="#1F2547"/><rect x="34" y="33" width="16" height="3" rx="1.5" fill="#fff"/><rect x="34" y="40" width="10" height="3" rx="1.5" fill="#fff"/></svg>
+            <div><h3>Luggage tag</h3><p>For suitcases, backpacks and sports kits.</p></div>
+          </div>
+          <div class="tag">
+            <svg class="tag-art" viewBox="0 0 76 76" aria-hidden="true"><circle cx="38" cy="40" r="24" fill="#1E8A5A"/><circle cx="38" cy="14" r="5" fill="none" stroke="#1F2547" stroke-width="3"/><rect x="28" y="30" width="20" height="20" rx="3" fill="#fff"/><rect x="32" y="34" width="5" height="5" fill="#1F2547"/><rect x="39" y="41" width="5" height="5" fill="#1F2547"/></svg>
+            <div><h3>Pet tag</h3><p>For collars. A finder can reach you right away, day or night.</p></div>
+          </div>
+        </div>
+        <p class="tag-facts">Waterproof, scratch-resistant, and reusable: move a tag to something new in a few taps.</p>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- FOOTER -->
-  <footer class="bg-ink text-cream pt-20 pb-10 overflow-hidden">
-    <div class="max-w-6xl mx-auto px-5">
-      <p class="font-serif font-bold text-[18vw] md:text-[11rem] leading-none tracking-tight">reunivo<span class="text-coral">.</span></p>
-      <div class="mt-10 flex flex-col md:flex-row justify-between gap-4 text-sm text-cream/50">
-        <p>Every lost thing has a way home.</p>
-        <p>© 2026 Reunivo · Made with 💛 in India</p>
+    <!-- ============ WAITLIST (claim ticket) ============ -->
+    <section class="section claim" id="join">
+      <div class="wrap claim-grid">
+        <div>
+          <h2>Claim your place in the queue</h2>
+          <p class="lede">Early members get a free starter pack of tags when Reunivo launches.</p>
+          <p class="joined" id="signup-count" hidden><b id="signup-count-num"></b> people are already on the list</p>
+        </div>
+
+        <div class="ticket-form">
+          <div class="ticket-top">
+            <div>
+              <p class="t-title">Reunivo waitlist</p>
+              <p class="t-sub">Keep this stub. We'll write when it's your turn.</p>
+            </div>
+            <p class="ticket-no" id="ticket-no" hidden><small>Your number</small><span id="ticket-no-num"></span></p>
+          </div>
+
+          <form id="join-form" action="https://silentforms.com/api/submit" method="POST" novalidate>
+            <!-- SilentForms access key: tells SilentForms which inbox gets the sign-up -->
+            <input type="hidden" name="accessKey" value="3af1ee1057c39fb8fe12ba11e6e83eb3c9266385d0cc629122df330655daa658" />
+            <input type="hidden" name="wants_to_tag" id="wants-to-tag" value="" />
+            <!-- Honeypot spam trap: hidden from people, bots fill it in -->
+            <div style="position:absolute;left:-9999px;" aria-hidden="true">
+              <input type="text" name="sf_extra" tabindex="-1" autocomplete="off" />
+            </div>
+
+            <div class="field">
+              <label for="f-name">Your name</label>
+              <input id="f-name" name="name" required autocomplete="name" placeholder="Priya Sharma" />
+            </div>
+            <div class="field">
+              <label for="f-email">Email</label>
+              <input id="f-email" name="email" type="email" required autocomplete="email" placeholder="priya@example.com" />
+            </div>
+            <div class="field">
+              <span class="field-label" id="chips-label">What would you tag first?</span>
+              <div class="chips" role="group" aria-labelledby="chips-label">
+                <button type="button" class="chip" aria-pressed="false">🔑 Keys</button>
+                <button type="button" class="chip" aria-pressed="false">👛 Wallet</button>
+                <button type="button" class="chip" aria-pressed="false">🎒 Bag</button>
+                <button type="button" class="chip" aria-pressed="false">🧳 Luggage</button>
+                <button type="button" class="chip" aria-pressed="false">🐶 Pet</button>
+                <button type="button" class="chip" aria-pressed="false">🧒 Kid's things</button>
+                <button type="button" class="chip" aria-pressed="false">💻 Laptop</button>
+              </div>
+            </div>
+            <button type="submit" class="btn">Join the waitlist</button>
+            <p class="form-error" id="join-error" role="alert" hidden></p>
+            <p class="fine">One email when we launch. No spam, no sharing.</p>
+          </form>
+
+          <div class="done" id="join-done" role="status" hidden>
+            <span class="stamp-big">ON THE LIST</span>
+            <h3 id="join-done-title">You're on the list</h3>
+            <p id="join-done-text"></p>
+            <p class="count-line" id="join-done-count" hidden></p>
+            <div><button class="btn" type="button" id="share-btn">Share with a friend</button></div>
+          </div>
+        </div>
       </div>
+    </section>
+
+    <!-- ============ FAQ ============ -->
+    <section class="section" id="faq">
+      <div class="wrap">
+        <div class="section-head"><h2>Questions people ask</h2></div>
+        <div class="faq-list">
+          <details><summary>Does the finder need an app?</summary><p>No. They point their normal camera at the tag and a simple web page opens. If the code is damaged, they can type the short number printed on the tag instead.</p></details>
+          <details><summary>Is it a GPS tracker?</summary><p>No. There's no battery and nothing to charge. A tag works the moment a kind person picks up your thing, and if they allow it, you'll see roughly where it was scanned.</p></details>
+          <details><summary>Can someone misuse my tag?</summary><p>Finders never see your contact details. You can pause a tag at any time, block anyone in the chat, and requests for money are blocked automatically.</p></details>
+          <details><summary>Can I move a tag to something else?</summary><p>Yes. Rename the item or move the tag to something new in a few taps.</p></details>
+          <details><summary>When do you launch?</summary><p>Soon. People on the waitlist get access first, plus a free starter pack.</p></details>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot-grid">
+      <div>
+        <a class="mark" href="#top"><svg aria-hidden="true"><use href="#mark"/></svg>reunivo</a>
+        <p class="hand">Lost things, found people.</p>
+      </div>
+      <p>© 2026 Reunivo. Made in India.</p>
     </div>
   </footer>
 
   <script>
-    // ---------- Hero QR (points to this page) ----------
+    // ---------- Shared: a decorative code pattern (not a real scannable code) ----------
+    function codePattern(seedText, fill = '#1F2547') {
+      let h = 2166136261;
+      for (const ch of seedText) h = Math.imul(h ^ ch.codePointAt(0), 16777619);
+      const N = 21, cells = [];
+      const inFinder = (x, y) => (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
+      for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+        if (inFinder(x, y)) continue;
+        h = Math.imul(h ^ (x * 31 + y), 2654435761) >>> 0;
+        if (h % 100 < 48) cells.push(`<rect x="${x}" y="${y}" width="1" height="1"/>`);
+      }
+      const finder = (x, y) => `<rect x="${x}" y="${y}" width="7" height="7" fill="${fill}"/><rect x="${x + 1}" y="${y + 1}" width="5" height="5" fill="#fff"/><rect x="${x + 2}" y="${y + 2}" width="3" height="3" fill="${fill}"/>`;
+      return { svg: `<g fill="${fill}">${cells.join('')}</g>${finder(0, 0)}${finder(14, 0)}${finder(0, 14)}`, hash: h >>> 0 };
+    }
+
+    // ---------- Opening: one big tag, cut loose (on every load) ----------
     (function () {
-      try {
-        const qr = qrcode(0, 'M');
-        qr.addData(location.protocol.startsWith('http') ? location.href.split('#')[0] : 'https://reunivo.app/f/7K2M');
-        qr.make();
-        document.getElementById('hero-qr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 0, scalable: true });
-      } catch (e) {
-        document.getElementById('hero-qr').innerHTML = '<div class="w-full h-full bg-[repeating-conic-gradient(#14121F_0_25%,#FBF7F0_0_50%)] bg-[length:12px_12px] rounded"></div>';
+      const intro = document.getElementById('intro');
+      if (!document.documentElement.classList.contains('intro-on')) { intro.remove(); return; }
+      intro.hidden = false;
+      document.getElementById('intro-code').innerHTML = `<svg viewBox="0 0 21 21" shape-rendering="crispEdges">${codePattern('reunivo').svg}</svg>`;
+      let finished = false;
+      function finish() {
+        if (finished) return; finished = true;
+        intro.classList.add('cut');
+        setTimeout(() => {
+          intro.classList.add('gone');
+          document.documentElement.classList.remove('intro-on');
+          setTimeout(() => intro.remove(), 900);
+        }, 750);
+      }
+      const timer = setTimeout(finish, 2300);
+      intro.addEventListener('click', () => { clearTimeout(timer); finish(); });
+      addEventListener('keydown', function k(e) { if (e.key === 'Escape' || e.key === 'Enter' || e.key === ' ') { clearTimeout(timer); finish(); removeEventListener('keydown', k); } });
+    })();
+
+    // ---------- Trust: take a tag apart ----------
+    (function () {
+      const stack = document.getElementById('stack');
+      const hint = document.getElementById('stack-hint');
+      const btns = [...document.querySelectorAll('.layer-btn')];
+      const id = '7K2M9QX4';
+      document.getElementById('stack-code').innerHTML = codePattern(id).svg;
+      document.getElementById('trust-url').textContent = 'reunivo.app/t/' + id;
+      btns.forEach(b => b.addEventListener('click', () => {
+        const open = b.getAttribute('aria-pressed') === 'true';
+        btns.forEach(x => x.setAttribute('aria-pressed', 'false'));
+        if (open) { stack.dataset.step = '0'; hint.hidden = false; return; }
+        b.setAttribute('aria-pressed', 'true');
+        stack.dataset.step = b.dataset.step;
+        hint.hidden = true;
+      }));
+      // When the section comes into view, explode the tag once so people see it's made of layers.
+      if ('IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        const io = new IntersectionObserver(es => {
+          if (es.some(e => e.isIntersecting)) {
+            io.disconnect();
+            setTimeout(() => { if (stack.dataset.step === '0') btns[0].click(); }, 600);
+          }
+        }, { threshold: 0.5 });
+        io.observe(stack);
       }
     })();
 
-    // ---------- Mobile menu ----------
+    addEventListener('load', () => window.scrollTo(0, 0));
+    addEventListener('pageshow', e => { if (e.persisted) location.reload(); }); // back/forward cache: replay too
+
+    // ---------- Nav border on scroll ----------
     (function () {
-      const btn = document.getElementById('menu-btn');
-      const menu = document.getElementById('mobile-menu');
-      const set = open => { menu.classList.toggle('open', open); btn.textContent = open ? '✕' : '☰'; btn.setAttribute('aria-expanded', open); };
-      btn.addEventListener('click', () => set(!menu.classList.contains('open')));
-      menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => set(false)));
+      const nav = document.getElementById('nav');
+      const onScroll = () => nav.classList.toggle('scrolled', scrollY > 8);
+      addEventListener('scroll', onScroll, { passive: true }); onScroll();
     })();
 
-    // ---------- Scroll reveal ----------
-    const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.12 });
-    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-    // ---------- Film ----------
+    // ---------- The city of threads ----------
     (function () {
-      const stage = document.getElementById('film-stage');
-      // Swap in a real video if VIDEO_URL is set
-      if (VIDEO_URL) {
-        const isFile = /\.(mp4|webm|mov)(\?|$)/i.test(VIDEO_URL);
-        stage.innerHTML = isFile
-          ? `<video src="${VIDEO_URL}" controls playsinline class="w-full h-full object-cover"></video>`
-          : `<iframe src="${VIDEO_URL}" class="w-full h-full" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-        return;
-      }
-      const scenes = [...stage.querySelectorAll('.scene')];
-      const PER = 5000; // ms per scene
-      const TOTAL = PER * scenes.length;
-      const caption = document.getElementById('film-caption');
-      const bar = document.getElementById('film-bar');
-      const time = document.getElementById('film-time');
-      const toggle = document.getElementById('film-toggle');
-      const overlay = document.getElementById('film-play');
-      let elapsed = 0, playing = false, last = 0, current = -1;
+      const NS = 'http://www.w3.org/2000/svg';
+      const svg = document.getElementById('map-svg');
+      const map = document.getElementById('map');
+      const base = document.getElementById('map-base');
+      const threadsG = document.getElementById('map-threads');
+      const homesG = document.getElementById('map-homes');
+      const el = (tag, attrs, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+      const W = 600, H = 440;
 
-      function show(i) {
-        if (i === current) return;
-        current = i;
-        scenes.forEach((s, k) => s.classList.toggle('active', k === i));
-        caption.textContent = scenes[i].dataset.caption;
+      // City blocks between the streets (streets run along x = 150, 330, 480 and y = 120, 260, 380)
+      const cols = [[10, 140], [160, 320], [340, 470], [490, 590]];
+      const rows = [[10, 110], [130, 250], [270, 370], [390, 430]];
+      let seed = 7; const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+      rows.forEach(([y1, y2], r) => cols.forEach(([x1, x2], c) => {
+        if (r === 1 && c === 1) { // the park
+          el('rect', { x: x1, y: y1, width: x2 - x1, height: y2 - y1, rx: 12, fill: '#1D5446' }, base);
+          for (let i = 0; i < 14; i++) el('circle', { cx: x1 + 14 + rand() * (x2 - x1 - 28), cy: y1 + 14 + rand() * (y2 - y1 - 28), r: 5 + rand() * 5, fill: '#256B58' }, base);
+          return;
+        }
+        el('rect', { x: x1, y: y1, width: x2 - x1, height: y2 - y1, rx: 9, fill: '#252B5C' }, base);
+        for (let x = x1 + 9; x < x2 - 8; x += 13) for (let y = y1 + 9; y < y2 - 8; y += 14) {
+          if (rand() < 0.55) el('rect', { x, y, width: 5, height: 6, rx: 1, fill: '#F2A007', opacity: (0.05 + rand() * 0.22).toFixed(2) }, base);
+        }
+      }));
+      [150, 330, 480].forEach(x => el('line', { x1: x, y1: 0, x2: x, y2: H, class: 'road' }, base));
+      [120, 260, 380].forEach(y => el('line', { x1: 0, y1: y, x2: W, y2: y, class: 'road' }, base));
+
+      // Owners' homes
+      const HOMES = [
+        { x: 75, y: 320, who: 'Meera' }, { x: 405, y: 320, who: 'Kabir' },
+        { x: 540, y: 58, who: 'Ananya' }, { x: 240, y: 318, who: 'Rohan' },
+      ];
+      const houseEls = HOMES.map(h => {
+        const g = el('g', { class: 'house', transform: `translate(${h.x} ${h.y})` }, homesG);
+        el('path', { d: 'M-16 -2 L0 -16 L16 -2 Z', fill: '#4A5294' }, g);
+        el('rect', { x: -12, y: -2, width: 24, height: 18, rx: 2, fill: '#323A78' }, g);
+        el('rect', { x: -6, y: 2, width: 12, height: 9, rx: 1.5, class: 'pane' }, g);
+        el('text', { x: 0, y: 32, 'text-anchor': 'middle', class: 'who' }, g).textContent = h.who;
+        return g;
+      });
+
+      // Lost things, where they were found, and the street route back to their owner
+      const THINGS = [
+        { emoji: '☂️', x: 60, y: 58, place: 'Station', lx: 60, ly: 98, home: 1, pts: [[60,58],[60,120],[330,120],[330,320],[389,320]],
+          name: 'Kabir\'s black umbrella', found: 'the station, platform 2', finder: 'a commuter', msg: 'Left it with the station master', time: '3 hours later', note: '“Sent the finder a thank-you selfie with it.”' },
+        { emoji: '🔑', x: 410, y: 58, place: 'Café', lx: 410, ly: 98, home: 0, pts: [[410,58],[410,120],[150,120],[150,320],[91,320]],
+          name: 'Meera\'s keys, red ring', found: 'the corner café', finder: 'the barista', msg: 'Kept them behind the counter', time: '40 minutes later', note: '“I didn\'t even know they were gone.”' },
+        { emoji: '🧴', x: 330, y: 196, place: 'Bus 14', lx: 352, ly: 214, home: 2, pts: [[330,196],[330,120],[480,120],[480,58],[524,58]],
+          name: 'Ananya\'s steel bottle', found: 'school bus 14', finder: 'the bus attendant', msg: 'Handed it to her class teacher', time: 'the next morning', note: '“Third bottle this term. First one back.”' },
+        { emoji: '🎧', x: 410, y: 410, place: 'Auto stand', lx: 432, ly: 414, home: 3, pts: [[410,410],[410,380],[330,380],[330,318],[256,318]],
+          name: 'Rohan\'s earbuds case', found: 'an auto rickshaw', finder: 'the driver', msg: 'Dropped it at the society gate', time: '2 hours later', note: '“He refused the tip. Took a chai instead.”' },
+        { emoji: '💼', x: 560, y: 190, place: 'Airport', lx: 560, ly: 230, home: 3, pts: [[560,190],[560,260],[240,260],[240,302]],
+          name: 'Rohan\'s laptop bag', found: 'the airport lounge', finder: 'a lounge attendant', msg: 'Held it at the front desk', time: 'before boarding', note: '“The gate was still open. Rohan was not.”' },
+        { emoji: '🐕', x: 240, y: 186, place: 'Park', lx: 240, ly: 236, home: 1, pts: [[240,186],[240,260],[330,260],[330,320],[389,320]],
+          name: 'Bruno, Kabir\'s beagle', found: 'the park', finder: 'a morning walker', msg: 'Waiting by the main gate with him', time: '25 minutes later', note: '“He was not sorry at all.”' },
+      ];
+      THINGS.forEach(t => el('text', { x: t.lx, y: t.ly, 'text-anchor': t.lx !== t.x ? 'start' : 'middle', class: 'label' }, base).textContent = t.place);
+
+      const pct = (v, of) => (v / of * 100) + '%';
+      const buttons = THINGS.map((t, i) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'thing'; b.textContent = t.emoji;
+        b.style.left = pct(t.x, W); b.style.top = pct(t.y, H);
+        b.setAttribute('aria-label', `${t.name}, lost at the ${t.place.toLowerCase()}. Send it home.`);
+        b.setAttribute('aria-describedby', 'route');
+        b.addEventListener('click', () => sendHome(i));
+        map.appendChild(b);
+        return b;
+      });
+
+      const route = document.getElementById('route');
+      const tally = document.getElementById('tally');
+      const resetBtn = document.getElementById('reset-night');
+      const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+      const done = new Set();
+      let busy = false, bubble = null;
+
+      function showRoute(t) {
+        route.classList.remove('play');
+        route.innerHTML = `
+          <h3>${esc(t.name)}</h3>
+          <ol>
+            <li class="reveal-line"><span>1</span><span>Found at <b>${esc(t.found)}</b> by ${esc(t.finder)}.</span></li>
+            <li class="reveal-line"><span>2</span><span>They scanned the tag with their phone camera.</span></li>
+            <li class="reveal-line"><span>3</span><span>The owner got a message: <b>${esc(t.msg)}</b>.</span></li>
+            <li class="reveal-line"><span>✓</span><span>Back home <b>${esc(t.time)}</b>.</span></li>
+          </ol>
+          <p class="route-note">${esc(t.note)}</p>`;
+        requestAnimationFrame(() => requestAnimationFrame(() => route.classList.add('play')));
       }
-      function fmt(ms) { const s = Math.floor(ms / 1000); return `0:${String(s).padStart(2, '0')}`; }
-      function tick(t) {
-        if (!playing) return;
-        elapsed += t - last; last = t;
-        if (elapsed >= TOTAL) { elapsed = TOTAL; playing = false; toggle.textContent = '↺'; }
-        show(Math.min(scenes.length - 1, Math.floor(elapsed / PER)));
-        bar.style.width = (elapsed / TOTAL * 100) + '%';
-        time.textContent = fmt(elapsed);
-        if (playing) requestAnimationFrame(tick);
+
+      function drawThread(path, spark) {
+        const len = path.getTotalLength();
+        path.style.strokeDasharray = len; path.style.strokeDashoffset = len;
+        if (reduce) { path.style.strokeDashoffset = 0; return Promise.resolve(); }
+        const dur = Math.min(2400, Math.max(1300, len * 3.2));
+        return new Promise(resolve => {
+          const t0 = performance.now();
+          (function frame(now) {
+            const k = Math.min(1, (now - t0) / dur);
+            const e = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+            path.style.strokeDashoffset = len * (1 - e);
+            const p = path.getPointAtLength(len * e);
+            spark.setAttribute('cx', p.x); spark.setAttribute('cy', p.y);
+            k < 1 ? requestAnimationFrame(frame) : resolve();
+          })(t0);
+        });
       }
-      function play() {
-        if (elapsed >= TOTAL) { elapsed = 0; current = -1; }
-        playing = true; overlay.classList.add('hidden'); toggle.textContent = '❚❚';
-        last = performance.now(); requestAnimationFrame(tick);
+
+      async function sendHome(i) {
+        if (busy || done.has(i)) return;
+        busy = true;
+        const t = THINGS[i], b = buttons[i], h = HOMES[t.home];
+        if (bubble) { bubble.remove(); bubble = null; }
+        b.classList.add('scanning');
+        await wait(900);
+        const path = el('path', { d: 'M' + t.pts.map(p => p.join(' ')).join(' L'), class: 'thread' }, threadsG);
+        const spark = el('circle', { r: 5, class: 'spark', cx: t.x, cy: t.y }, threadsG);
+        await drawThread(path, spark);
+        spark.remove(); path.classList.add('done');
+        houseEls[t.home].classList.add('lit');
+        b.classList.remove('scanning'); b.classList.add('home');
+        b.setAttribute('aria-label', `${t.name}: home.`);
+
+        bubble = document.createElement('p');
+        bubble.className = 'map-bubble'; bubble.textContent = `“${t.msg}”`;
+        bubble.style.left = pct(h.x, W); bubble.style.top = pct(h.y, H);
+        const shift = h.x > W * 0.72 ? '-88%' : h.x < W * 0.25 ? '-12%' : '-50%';
+        bubble.style.translate = h.y < 120 ? `${shift} 46px` : `${shift} calc(-100% - 22px)`;
+        map.appendChild(bubble);
+
+        done.add(i);
+        showRoute(t);
+        tally.innerHTML = done.size === THINGS.length
+          ? '<b>6</b> of 6 home. Every thread found its way back.'
+          : `<b>${done.size}</b> of 6 things home tonight`;
+        resetBtn.hidden = false;
+        busy = false;
       }
-      function pause() { playing = false; toggle.textContent = '▶'; }
-      overlay.addEventListener('click', play);
-      toggle.addEventListener('click', () => (playing ? pause() : play()));
-      show(0); time.textContent = fmt(0);
+
+      resetBtn.addEventListener('click', () => {
+        if (busy) return;
+        threadsG.replaceChildren();
+        houseEls.forEach(g => g.classList.remove('lit'));
+        buttons.forEach((b, i) => { b.classList.remove('home'); b.setAttribute('aria-label', `${THINGS[i].name}, lost at the ${THINGS[i].place.toLowerCase()}. Send it home.`); });
+        if (bubble) { bubble.remove(); bubble = null; }
+        done.clear();
+        tally.innerHTML = '<b>0</b> of 6 things home tonight';
+        route.innerHTML = '<p class="route-empty">Every lost thing here is tied to its owner by a thread.<br />Tap one and watch it find the way back.</p>';
+        resetBtn.hidden = true;
+      });
+
+      // One orchestrated moment: the first time the city is seen, one thread pulls itself home.
+      if (!reduce && 'IntersectionObserver' in window) {
+        const io = new IntersectionObserver(entries => {
+          if (entries.some(e => e.isIntersecting)) { io.disconnect(); setTimeout(() => { if (!done.size) sendHome(1); }, 1100); }
+        }, { threshold: 0.55 });
+        io.observe(map);
+      }
     })();
 
-    // ---------- Interactive finder demo ----------
+    // ---------- Both ends of one scan ----------
     (function () {
       const steps = document.querySelectorAll('[data-step]');
       const go = s => steps.forEach(el => el.classList.toggle('on', el.dataset.step === s));
-      const alertEl = document.getElementById('owner-alert');
-      const msgEl = document.getElementById('owner-msg');
-      const idle = document.getElementById('owner-idle');
-      const reply = document.getElementById('finder-reply');
-      const done = document.getElementById('finder-done');
-      const replyBtn = document.getElementById('owner-reply');
+      const $ = id => document.getElementById(id);
+      const alertEl = $('owner-alert'), msgEl = $('owner-msg'), idle = $('owner-idle');
+      const reply = $('finder-reply'), done = $('finder-done'), replyBtn = $('owner-reply');
+      const replyText = replyBtn.textContent;
 
       function reset() {
-        [alertEl, msgEl, reply, done].forEach(el => el.classList.add('hidden'));
-        idle.classList.remove('hidden'); replyBtn.disabled = false; replyBtn.textContent = 'Reply: hand it to the help desk';
+        [alertEl, msgEl, reply, done].forEach(el => (el.hidden = true));
+        idle.hidden = false; replyBtn.disabled = false; replyBtn.textContent = replyText;
       }
       document.querySelectorAll('[data-go]').forEach(btn => btn.addEventListener('click', () => {
-        const target = btn.dataset.go;
-        if (target === 'a') { reset(); go('a'); return; }
-        if (target === 'b') {
+        const t = btn.dataset.go;
+        if (t === 'a') { reset(); go('a'); return; }
+        if (t === 'b') {
           go('b');
-          setTimeout(() => { go('c'); idle.classList.add('hidden'); alertEl.classList.remove('hidden'); }, 1400);
+          setTimeout(() => { go('c'); idle.hidden = true; alertEl.hidden = false; }, 1400);
           return;
         }
-        if (target === 'd') {
-          const text = document.getElementById('finder-msg').value.trim() || 'I found your wallet!';
-          document.getElementById('finder-sent').textContent = text;
-          document.getElementById('owner-msg-text').textContent = '“' + text + '”';
+        if (t === 'd') {
+          const text = $('finder-msg').value.trim() || 'I found your wallet!';
+          $('finder-sent').textContent = text;
+          $('owner-msg-text').textContent = '“' + text + '”';
           go('d');
-          setTimeout(() => msgEl.classList.remove('hidden'), 600);
+          setTimeout(() => (msgEl.hidden = false), 600);
         }
       }));
       replyBtn.addEventListener('click', () => {
-        replyBtn.disabled = true; replyBtn.textContent = 'Sent ✓';
-        setTimeout(() => { reply.classList.remove('hidden'); done.classList.remove('hidden'); }, 500);
+        replyBtn.disabled = true; replyBtn.textContent = 'Reply sent';
+        setTimeout(() => { reply.hidden = false; done.hidden = false; }, 500);
       });
-      // live clock on owner phone
-      const clock = document.getElementById('owner-clock');
-      const upd = () => { const d = new Date(); clock.textContent = (d.getHours() % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0'); };
+      const upd = () => {
+        const d = new Date();
+        $('owner-clock').textContent = (d.getHours() % 12 || 12) + ':' + String(d.getMinutes()).padStart(2, '0');
+        $('owner-day').textContent = d.toLocaleDateString('en-IN', { weekday: 'long' });
+      };
       upd(); setInterval(upd, 30000);
     })();
 
-    // ---------- Live sign-up counter ----------
-    // Reads the number from /api/signups (functions/api/signups.js on Cloudflare).
+    // ---------- Tag maker ----------
+    (function () {
+      const $ = id => document.getElementById(id);
+      const nameEl = $('maker-name'), hideEl = $('maker-hide'), noteEl = $('maker-note');
+      const items = [...document.querySelectorAll('#maker-items .pick')];
+      const colors = [...document.querySelectorAll('#maker-colors .swatch')];
+      const tag = $('mytag');
+      let item = items[0];
+      const plural = n => ['keys'].includes(n);
+
+      // A small decorative code pattern that changes with the name, so every tag looks like its own.
+      function drawCode(seedText) {
+        let h = 2166136261;
+        for (const ch of seedText) h = Math.imul(h ^ ch.codePointAt(0), 16777619);
+        const N = 21, cells = [];
+        const finder = (x, y) => [[x, y, 7, 7, 1], [x + 1, y + 1, 5, 5, 0], [x + 2, y + 2, 3, 3, 1]];
+        const inFinder = (x, y) => (x < 8 && y < 8) || (x > 12 && y < 8) || (x < 8 && y > 12);
+        for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
+          if (inFinder(x, y)) continue;
+          h = Math.imul(h ^ (x * 31 + y), 2654435761) >>> 0;
+          if (h % 100 < 48) cells.push(`<rect x="${x}" y="${y}" width="1" height="1"/>`);
+        }
+        const f = [...finder(0, 0), ...finder(14, 0), ...finder(0, 14)]
+          .map(([x, y, w, hh, on]) => `<rect x="${x}" y="${y}" width="${w}" height="${hh}" fill="${on ? '#1F2547' : '#fff'}"/>`).join('');
+        $('mytag-qr').innerHTML = `<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges"><g fill="#1F2547">${cells.join('')}</g>${f}</svg>`;
+        $('mytag-code-id').textContent = 'RV-' + ((h >>> 0) % 36 ** 4).toString(36).toUpperCase().padStart(4, '0');
+      }
+
+      function render() {
+        const noun = item.dataset.noun;
+        const name = nameEl.value.trim();
+        const showName = !hideEl.checked && name;
+        nameEl.disabled = hideEl.checked;
+        $('mytag-line').textContent = `Found my ${noun}?`;
+        $('mini-emoji').textContent = item.dataset.emoji;
+        const these = plural(noun) ? `These ${noun}` : `This ${noun}`;
+        const verb = plural(noun) ? 'belong' : 'belongs';
+        $('mini-belongs').textContent = showName ? `${these} ${verb} to ${name}.` : `${these} ${verb} to someone who'd love it back.`;
+        $('mini-note').textContent = noteEl.value.trim();
+        $('maker-count').textContent = `${noteEl.value.length} / 90`;
+        drawCode((showName ? name : '') + noun);
+      }
+
+      const pressOne = (list, btn) => list.forEach(b => b.setAttribute('aria-pressed', b === btn));
+      items.forEach(b => b.addEventListener('click', () => { item = b; pressOne(items, b); render(); }));
+      colors.forEach(b => b.addEventListener('click', () => {
+        pressOne(colors, b);
+        tag.style.setProperty('--tag', b.dataset.bg);
+        tag.style.setProperty('--tag-ink', b.dataset.ink);
+        $('mini-note').style.setProperty('--tag', b.dataset.bg === '#FFFFFF' ? '#C9D2E3' : b.dataset.bg);
+      }));
+      document.querySelectorAll('.idea').forEach(b => b.addEventListener('click', () => { noteEl.value = b.textContent; render(); noteEl.focus(); }));
+      [nameEl, noteEl].forEach(el => el.addEventListener('input', render));
+      hideEl.addEventListener('change', render);
+
+      // "Save my place": jump to the waitlist with this item's chip ticked and the name filled in.
+      $('maker-claim').addEventListener('click', () => {
+        const chip = [...document.querySelectorAll('#join-form .chip')].find(c => c.textContent.trim() === item.dataset.chip);
+        if (chip && chip.getAttribute('aria-pressed') !== 'true') chip.click();
+        const formName = document.getElementById('f-name');
+        if (!hideEl.checked && nameEl.value.trim() && !formName.value) formName.value = nameEl.value.trim();
+      });
+      render();
+    })();
+
+    // ---------- Live sign-up count ----------
+    // Reads the number from /api/signups (src/signups.js on Cloudflare). The API token never reaches this page.
     function getSignupCount() {
-      if (!location.protocol.startsWith('http')) return Promise.resolve(null); // needs the live site
+      if (!location.protocol.startsWith('http')) return Promise.resolve(null);
       return fetch('/api/signups', { cache: 'no-store' })
         .then(r => (r.ok ? r.json() : null))
         .then(d => { const n = d && Number(d.count); return Number.isFinite(n) ? n : null; })
-        .catch(() => null); // no counter is better than a broken one
+        .catch(() => null); // no count is better than a broken one
     }
     const fmtCount = n => n.toLocaleString('en-IN');
     getSignupCount().then(n => {
       if (n === null || n < SIGNUP_COUNT_MIN) return;
       document.getElementById('signup-count-num').textContent = fmtCount(n);
-      document.getElementById('signup-count').classList.remove('hidden');
+      document.getElementById('signup-count').hidden = false;
+      document.getElementById('ticket-no-num').textContent = '#' + fmtCount(n + 1);
+      document.getElementById('ticket-no').hidden = false;
     });
 
     // ---------- Waitlist ----------
@@ -760,54 +1186,59 @@
       const picked = new Set();
       document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
         const v = c.textContent.trim();
-        if (picked.has(v)) { picked.delete(v); c.classList.remove('bg-ink', 'text-cream', 'border-ink'); }
-        else { picked.add(v); c.classList.add('bg-ink', 'text-cream', 'border-ink'); }
+        const on = !picked.has(v);
+        on ? picked.add(v) : picked.delete(v);
+        c.setAttribute('aria-pressed', on);
         document.getElementById('wants-to-tag').value = [...picked].join(', ');
       }));
 
-      // The sign-up is sent to SilentForms in the background, so the visitor stays on
-      // this page and sees a "You're in!" message instead of being sent anywhere else.
+      // Sent to SilentForms in the background: the visitor stays on this page.
       const form = document.getElementById('join-form');
       const btn = form.querySelector('button[type=submit]');
       const btnText = btn.textContent;
       const errEl = document.getElementById('join-error');
+      const showError = msg => { errEl.textContent = msg; errEl.hidden = false; };
+
       form.addEventListener('submit', async e => {
         e.preventDefault();
+        errEl.hidden = true;
+        const nameEl = form.elements.name, emailEl = form.elements.email;
+        if (!nameEl.value.trim()) { showError('Add your name so we know who to write to.'); nameEl.focus(); return; }
+        if (!emailEl.checkValidity() || !emailEl.value.trim()) { showError('Check your email address. It needs an @ and a domain, like priya@example.com.'); emailEl.focus(); return; }
+
         const body = new FormData(form);
-        const name = String(body.get('name') || '').trim();
-        const email = String(body.get('email') || '').trim();
-        errEl.classList.add('hidden');
+        const name = String(body.get('name')).trim();
+        const email = String(body.get('email')).trim();
         btn.disabled = true; btn.textContent = 'Joining…';
         try {
-          // 'no-cors' lets the browser send the form to SilentForms like a normal form post.
-          // The reply can't be read, but a network failure still lands in catch below.
+          // 'no-cors' sends it like a normal form post. The reply can't be read,
+          // but a network failure still lands in catch.
           await fetch(form.action, { method: 'POST', body, mode: 'no-cors' });
         } catch (err) {
           console.error(err);
-          errEl.textContent = 'Sorry, that didn\'t go through. Please check your connection and try again.';
-          errEl.classList.remove('hidden');
+          showError('That didn\'t send. Check your connection and try again.');
           btn.disabled = false; btn.textContent = btnText;
           return;
         }
-        form.classList.add('hidden');
+        form.hidden = true;
         document.getElementById('join-done-text').textContent =
-          `Thanks ${name.split(' ')[0] || 'friend'}! We'll email ${email} the moment Reunivo launches.`;
-        document.getElementById('join-done').classList.remove('hidden');
+          `Thanks, ${name.split(' ')[0]}. We'll email ${email} the moment Reunivo launches.`;
+        document.getElementById('join-done').hidden = false;
 
-        // Show how many people have subscribed so far (including this sign-up once SilentForms counts it).
+        // How many people have subscribed so far (including this sign-up once SilentForms counts it)
         const n = await getSignupCount();
         if (n !== null && n > 0) {
-          const countEl = document.getElementById('join-done-count');
-          countEl.textContent = n === 1 ? '🎉 1 person has already subscribed' : `🎉 ${fmtCount(n)} people have already subscribed`;
-          countEl.classList.remove('hidden');
+          const line = document.getElementById('join-done-count');
+          line.textContent = n === 1 ? '1 person has subscribed so far' : `${fmtCount(n)} people have subscribed so far`;
+          line.hidden = false;
         }
       });
 
       document.getElementById('share-btn').addEventListener('click', async () => {
         const url = location.protocol.startsWith('http') ? location.href.split('#')[0] : 'https://reunivo.app';
-        const share = { title: 'Reunivo', text: 'Every lost thing has a way home. Join the Reunivo waitlist:', url };
+        const share = { title: 'Reunivo', text: 'Lost things, found people. Join the Reunivo waitlist:', url };
         if (navigator.share) { try { await navigator.share(share); } catch {} }
-        else { try { await navigator.clipboard.writeText(url); alert('Link copied!'); } catch { prompt('Copy this link:', url); } }
+        else { try { await navigator.clipboard.writeText(url); alert('Link copied.'); } catch { prompt('Copy this link:', url); } }
       });
     })();
   </script>
